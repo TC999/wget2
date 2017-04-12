@@ -194,7 +194,8 @@ struct config {
 		stats_site,
 		stats_all,
 		local_db,
-		regex_type;
+		regex_type,
+		filter_urls;
 };
 
 extern struct config

@@ -535,12 +535,11 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL((1)) parse_regex_type(option_t o
 {
 	if (!val || !wget_strcasecmp_ascii(val, "posix"))
 		*((char *)opt->var) = WGET_REGEX_TYPE_POSIX;
-		
-#if defined(WITH_LIBPCRE2) || defined(WITH_LIBPCRE)
+
+#if defined WITH_LIBPCRE2 || defined WITH_LIBPCRE
 	else if (!wget_strcasecmp_ascii(val, "pcre"))
 		*((char *)opt->var) = WGET_REGEX_TYPE_PCRE;
 #endif
-
 	else
 		error_printf_exit("Unsupported regex type '%s'\n", val);
 
@@ -844,6 +843,7 @@ struct config config = {
 static int parse_execute(option_t opt, const char *val, const char invert);
 static int parse_proxy(option_t opt, const char *val, const char invert);
 
+
 static const struct optionw options[] = {
 	// long name, config variable, parse function, number of arguments, short name
 	// leave the entries in alphabetical order of 'long_name' !
@@ -1074,6 +1074,12 @@ static const struct optionw options[] = {
 	{ "execute", NULL, parse_execute, 1, 'e',
 		SECTION_STARTUP,
 		{ "Wget compatibility option, not needed for Wget\n"
+		}
+	},
+	{ "filter-urls", &config.filter_urls, parse_bool, 0, 0,
+		SECTION_DOWNLOAD,
+		{ "Apply the accept and reject filters on the URL before starting a download.\n",
+		  "(default: off)\n"
 		}
 	},
 	{ "follow-tags", &config.follow_tags, parse_taglist, 1, 0,
@@ -1502,7 +1508,7 @@ static const struct optionw options[] = {
 	},
 	{ "regex-type", &config.regex_type, parse_regex_type, 1, 0,
 		SECTION_DOWNLOAD,
-#if defined(WITH_LIBPCRE2) || defined(WITH_LIBPCRE)
+#if defined WITH_LIBPCRE2 || defined WITH_LIBPCRE
 		{ "Regular expression type. Possible types are posix or pcre. (default: posix)\n" }
 #else
 		{ "Regular expression type. This build only supports posix. (default: posix)\n" }
