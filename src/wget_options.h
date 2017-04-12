@@ -71,7 +71,9 @@ struct config {
 		*egd_file,
 		*private_key,
 		*random_file,
-		*secure_protocol; // auto, SSLv2, SSLv3, TLSv1
+		*secure_protocol, // auto, SSLv2, SSLv3, TLSv1
+		*accept_regex,
+		*reject_regex;
 	wget_vector_t
 		*config_files,
 		*domains,
@@ -191,7 +193,8 @@ struct config {
 		force_progress,
 		stats_site,
 		stats_all,
-		local_db;
+		local_db,
+		regex_type;
 };
 
 extern struct config
