@@ -2101,6 +2101,7 @@ static void test_set_proxy(void)
 			result;
 	} test_data[] = {
 		{ "http://192.168.8.253:3128", "ASCII", 1 },
+		{ "  http://192.168.8.253:3128", "ASCII", 1 },
 		{ "", "ASCII", 0 },
 		{ " ", "ASCII", -1 },
 		{ NULL, "ASCII", -1 },
