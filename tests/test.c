@@ -2092,7 +2092,7 @@ static void test_robots(void)
 
 static void test_set_proxy(void)
 {
-	struct test_data {
+	static const struct test_data {
 		const char *
 			proxy;
 		const char *
@@ -2100,14 +2100,14 @@ static void test_set_proxy(void)
 		int
 			result;
 	} test_data[] = {
-		{ "http://192.168.8.253:3128", wget_local_charset_encoding(), 1 },
-		{ "", wget_local_charset_encoding(), 0 },
-		{ " ", wget_local_charset_encoding(), -1 },
-		{ NULL, wget_local_charset_encoding(), -1 },
-		{ "http://192.168.8.253:3128,http://foo.xyz", wget_local_charset_encoding(), 2},
-		{ ",,", wget_local_charset_encoding(), 0 },
-		{ ", http://192.168.8.253:3128", wget_local_charset_encoding(), 1 },
-		{ ", http://192.168.8.253:3128 ,, http://foo.xyz", wget_local_charset_encoding(), 2 },
+		{ "http://192.168.8.253:3128", "ASCII", 1 },
+		{ "", "ASCII", 0 },
+		{ " ", "ASCII", -1 },
+		{ NULL, "ASCII", -1 },
+		{ "http://192.168.8.253:3128,http://foo.xyz", "ASCII", 2},
+		{ ",,", "ASCII", 0 },
+		{ ", http://192.168.8.253:3128", "ASCII", 1 },
+		{ ", http://192.168.8.253:3128 ,, http://foo.xyz", "ASCII", 2 },
 	};
 
 	for (unsigned it = 0; it < countof(test_data); it++) {
@@ -2135,9 +2135,6 @@ static void test_set_proxy(void)
 			info_printf("Failed [%u]: wget_http_set_https_proxy(%s,%s) -> %d (expected %d)\n", it, t->proxy, t->encoding, n, t->result);
 		}
 	}
-
-	for (unsigned it = 0; it < countof(test_data); it++)
-		xfree(test_data[it].encoding);
 }
 
 int main(int argc, const char **argv)
