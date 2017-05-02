@@ -61,6 +61,7 @@ struct config {
 		*default_page,
 		*referer,
 		*directory_prefix,
+		*proxy,
 		*http_proxy,
 		*https_proxy,
 		*no_proxy,

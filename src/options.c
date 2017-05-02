@@ -906,6 +906,7 @@ static const struct optionw options[] = {
 	{ "private-key-type", &config.private_key_type, parse_cert_type, 1, 0 },
 	{ "progress", &config.progress, parse_progress_type, 1, 0 },
 	{ "protocol-directories", &config.protocol_directories, parse_bool, 0, 0 },
+	{ "proxy", &config.proxy, parse_string, 1, 0 },
 	{ "quiet", &config.quiet, parse_bool, 0, 'q' },
 	{ "quota", &config.quota, parse_numbytes, 1, 'Q' },
 	{ "random-file", &config.random_file, parse_filename, 1, 0 },
@@ -1447,6 +1448,13 @@ int init(int argc, const char **argv)
 	debug_printf("Local URI encoding = '%s'\n", config.local_encoding);
 	debug_printf("Input URI encoding = '%s'\n", config.input_encoding);
 
+	if(config.proxy) {
+		xfree(config.http_proxy);
+		xfree(config.https_proxy);
+		config.http_proxy = wget_strdup(config.proxy);
+		config.https_proxy = wget_strdup(config.proxy);
+	}
+
 	if (config.http_proxy && wget_http_set_http_proxy(config.http_proxy, config.local_encoding) < 0) {
 		error_printf(_("Failed to set http proxies %s\n"), config.http_proxy);
 		return -1;
@@ -1459,6 +1467,7 @@ int init(int argc, const char **argv)
 		error_printf(_("Failed to set proxy exceptions %s\n"), config.no_proxy);
 		return -1;
 	}
+	xfree(config.proxy);
 	xfree(config.http_proxy);
 	xfree(config.https_proxy);
 	xfree(config.no_proxy);
