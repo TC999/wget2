@@ -980,8 +980,8 @@ static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char
 	if (!strncmp(name, "no-", 3)) {
 		invert = 1;
 		name += 3;
-		opt = bsearch(name, options, countof(options), sizeof(options[0]), opt_compare);
 	}
+	opt = bsearch(name, options, countof(options), sizeof(options[0]), opt_compare);
 
 	if (!opt) {
 		// Fallback to linear search for 'unsharp' searching.
