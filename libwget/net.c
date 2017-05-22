@@ -77,7 +77,7 @@
  *
  * The following features are supported:
  *
- *  - TCP Fast Open (RFC 7413)
+ *  - TCP Fast Open ([RFC 7413](https://tools.ietf.org/html/rfc7413))
  *  - SSL/TLS
  *  - DNS caching
  *
@@ -317,10 +317,6 @@ void wget_dns_cache_free(void)
  *
  * Resolve a host name into its IPv4/IPv6 address.
  *
- * TODO maybe it shouldn't be suggested that the flags in `tcp` can be set directly (without using the setters).
- *
- * TODO tell that wget_tcp_resolve() fails if it cannot find an address of the family specified in `tcp->family`.
- *
  * The **caching** parameter tells wget_tcp_resolve() to use the DNS cache as long as possible. This means that if
  * the queried hostname is found in the cache, that will be returned without querying any actual DNS server. If no such
  * entry is found, a DNS query is performed, and the result stored in the cache. You can enable caching with wget_tcp_set_dns_caching().
@@ -335,9 +331,9 @@ void wget_dns_cache_free(void)
  *    with wget_tcp_set_dns_cache().
  *  - Address family: Desired address family for the returned addresses. This will typically be `AF_INET` or `AF_INET6`,
  *    but it can be any of the values defined in `<socket.h>`. Additionally, `AF_UNSPEC` means you don't care: it will
- *    return any address family that can be used with the specified \p host and \p port. If `tcp->family` is different
- *    than `AF_UNSPEC` and the specified family is not found, wget_tcp_resolve() will return NULL. You can set this
- *    with wget_tcp_set_family().
+ *    return any address family that can be used with the specified \p host and \p port. If **family** is different
+ *    than `AF_UNSPEC` and the specified family is not found, _that's an error condition_ and thus wget_tcp_resolve() will return NULL.
+ *    You can set this with wget_tcp_set_family().
  *  - Preferred address family: Tries to resolve addresses of this family if possible. This is only honored if **family**
  *    (see point above) is `AF_UNSPEC`.
  *
@@ -451,7 +447,7 @@ static int G_GNUC_WGET_CONST _family_to_value(int family)
  * \param[in] tcp A `wget_tcp_t` structure representing a TCP connection, returned by wget_tcp_init(). Might be NULL.
  * \param[in] tcp_fastopen 1 or 0, whether to enable or disable TCP Fast Open.
  *
- * Enable or disable TCP Fast Open (RFC 7413), if available.
+ * Enable or disable TCP Fast Open ([RFC 7413](https://tools.ietf.org/html/rfc7413)), if available.
  *
  * This function is a no-op on systems where TCP Fast Open is not supported.
  *
@@ -481,7 +477,7 @@ int wget_tcp_get_tcp_fastopen(wget_tcp_t *tcp)
  * \param[in] tcp A `wget_tcp_t` structure representing a TCP connection, returned by wget_tcp_init(). Might be NULL.
  * \param[in] false_start 1 or 0, whether to enable or disable TLS False Start.
  *
- * Enable or disable TLS False Start (RFC 7918).
+ * Enable or disable TLS False Start ([RFC 7918](https://tools.ietf.org/html/rfc7413)).
  *
  * If \p tcp is NULL, TLS False Start is enabled or disabled globally.
  */
@@ -782,8 +778,6 @@ int wget_tcp_get_ssl(wget_tcp_t *tcp)
  *
  * Sets the TLS Server Name Indication (SNI). For more info see [RFC 6066, sect. 3](https://tools.ietf.org/html/rfc6066#section-3).
  *
- * TODO if this works then place a link the rest of RFC references too.
- *
  * SNI basically does at the TLS layer what the `Host:` header field does at the application (HTTP) layer.
  * The server might use this information to locate an appropriate X.509 certificate from a pool of certificates, or to direct
  * the request to a specific virtual host, for instance.
@@ -835,8 +829,6 @@ wget_tcp_t *wget_tcp_init(void)
  * The `wget_tcp_t` structure will be freed and \p _tcp will be set to NULL.
  *
  * If \p _tcp is NULL, the SNI field will be cleared.
- *
- * TODO wouldn't it be better to reset all the other global parameters as well?
  *
  * Does not free the internal DNS cache, so that other connections can re-use it.
  * Call wget_dns_cache_free() if you want to free it.
@@ -1333,8 +1325,6 @@ ssize_t wget_tcp_read(wget_tcp_t *tcp, char *buf, size_t count)
  *
  *  - `0`: No timeout. The socket must be available immediately.
  *  - `-1`: Infinite timeout. Wait indefinitely until the socket becomes available.
- *
- * TODO maybe it should return the number of bytes written?
  *
  * You can set the timeout with wget_tcp_set_timeout().
  */
