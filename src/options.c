@@ -1404,6 +1404,12 @@ static const struct optionw options[] = {
 		{ "Enable web spider mode. (default: off)\n"
 		}
 	},
+	{ "stats", &config.stats, parse_bool, 0, 's',
+		SECTION_STARTUP,
+		{ "Show statistics\n",
+		  "(default: off)\n"
+		}
+	},
 	{ "strict-comments", &config.strict_comments, parse_bool, 0, 0,
 		SECTION_DOWNLOAD,
 		{ "A dummy option. Parsing always works non-strict.\n"
