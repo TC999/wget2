@@ -300,12 +300,12 @@ static const char *_read_flag_chars(const char *p, unsigned int *out)
 	return p;
 }
 
-static const char *_read_field_width(const char *p, int *out, unsigned int *flags, va_list args)
+static const char *_read_field_width(const char *p, int *out, unsigned int *flags, int width_is_external)
 {
 	int field_width;
 
-	if (*p == '*') {
-		field_width = va_arg(args, int);
+	if (width_is_external) {
+		field_width = *out;
 		if (field_width < 0) {
 			*flags |= FLAG_LEFT_ADJUST;
 			field_width = -field_width;
@@ -383,8 +383,17 @@ size_t wget_buffer_vprintf_append(wget_buffer_t *buf, const char *fmt, va_list a
 		/* Read the flag chars (optional, simplified) */
 		p = _read_flag_chars(p, &flags);
 
-		/* Read field width (optional) */
-		p = _read_field_width(p, &field_width, &flags, args);
+		/*
+		 * Read field width (optional).
+		 * If '*', then the field width is given as an additional argument,
+		 * which precedes the argument to be formatted.
+		 */
+		if (*p == '*') {
+			field_width = va_arg(args, int);
+			p = _read_field_width(p, &field_width, &flags, 1);
+		} else {
+			p = _read_field_width(p, &field_width, &flags, 0);
+		}
 
 		/* Read precision (optional) */
 		p = _read_precision(p, &precision, args);
