@@ -257,24 +257,22 @@ static void _convert_pointer(wget_buffer_t *buf, void *pointer)
 	wget_buffer_memcat(buf, dst, length);
 }
 
-static const char *_read_precision(const char *p, int *out, va_list args)
+static const char *_read_precision(const char *p, int *out, int precision_is_external)
 {
 	int precision = -1;
 
-	if (*p == '.') {
-		if (*++p == '*') {
-			precision = va_arg(args, int);
-			if (precision < 0 )
-				precision = 0;
-			p++;
-		} else if (c_isdigit(*p)) {
+	if (precision_is_external) {
+		precision = *out;
+		if (precision < 0 )
 			precision = 0;
-			do {
-				precision = precision * 10 + (*p - '0');
-			} while (c_isdigit(*++p));
-		} else {
-			precision = -1;
-		}
+		p++;
+	} else if (c_isdigit(*p)) {
+		precision = 0;
+		do {
+			precision = precision * 10 + (*p - '0');
+		} while (c_isdigit(*++p));
+	} else {
+		precision = -1;
 	}
 
 	*out = precision;
@@ -306,10 +304,12 @@ static const char *_read_field_width(const char *p, int *out, unsigned int *flag
 
 	if (width_is_external) {
 		field_width = *out;
+
 		if (field_width < 0) {
 			*flags |= FLAG_LEFT_ADJUST;
 			field_width = -field_width;
 		}
+
 		p++;
 	} else {
 		for (field_width = 0; c_isdigit(*p); p++)
@@ -334,7 +334,7 @@ static const char *_read_field_width(const char *p, int *out, unsigned int *flag
 size_t wget_buffer_vprintf_append(wget_buffer_t *buf, const char *fmt, va_list args)
 {
 	const char *p = fmt, *begin;
-	int field_width, precision;
+	int field_width, precision = -1;
 	unsigned int flags;
 	long long arg;
 	unsigned long long argu;
@@ -395,8 +395,19 @@ size_t wget_buffer_vprintf_append(wget_buffer_t *buf, const char *fmt, va_list a
 			p = _read_field_width(p, &field_width, &flags, 0);
 		}
 
-		/* Read precision (optional) */
-		p = _read_precision(p, &precision, args);
+		/*
+		 * Read precision (optional).
+		 * If '*', the precision is given as an additional argument,
+		 * just as the case for the field width.
+		 */
+		if (*p == '.') {
+			if (*++p == '*') {
+				precision = va_arg(args, int);
+				p = _read_precision(p, &precision, 1);
+			} else {
+				p = _read_precision(p, &precision, 0);
+			}
+		}
 
 		/* Read length modifier (optional) */
 		switch (*p) {
