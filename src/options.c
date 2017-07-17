@@ -743,7 +743,7 @@ static const struct optionw options[] = {
 		  "patterns.\n"
 		}
 	},
-	{ "adjust-extension", &config.adjust_extension, parse_bool, 0, 'E',
+	{ "adjust-extension", &config.adjust_extension, parse_bool, -1, 'E',
 		SECTION_HTTP,
 		{ "Append extension to saved file (.html or .css).\n",
 		  "(default: off)\n"
@@ -755,7 +755,7 @@ static const struct optionw options[] = {
 		  "'-' for STDOUT.\n"
 		}
 	},
-	{ "backup-converted", &config.backup_converted, parse_bool, 0, 'K',
+	{ "backup-converted", &config.backup_converted, parse_bool, -1, 'K',
 		SECTION_HTTP,
 		{ "When converting, keep the original file with\n",
 		  "a .orig suffix. (default: off)\n"
@@ -784,7 +784,7 @@ static const struct optionw options[] = {
 		{ "File with bundle of PEM CA certificates.\n"
 		}
 	},
-	{ "cache", &config.cache, parse_bool, 0, 0,
+	{ "cache", &config.cache, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Enabled using of server cache. (default: on)\n"
 		}
@@ -805,12 +805,12 @@ static const struct optionw options[] = {
 		  "(default: PEM)\n"
 		}
 	},
-	{ "check-certificate", &config.check_certificate, parse_bool, 0, 0,
+	{ "check-certificate", &config.check_certificate, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Check the server's certificate. (default: on)\n"
 		}
 	},
-	{ "check-hostname", &config.check_hostname, parse_bool, 0, 0,
+	{ "check-hostname", &config.check_hostname, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Check the server's certificate's hostname.\n",
 		  "(default: on)\n"
@@ -823,7 +823,7 @@ static const struct optionw options[] = {
 			"wget --chunk-size=1M\n"
 		}
 	},
-	{ "clobber", &config.clobber, parse_bool, 0, 0,
+	{ "clobber", &config.clobber, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Enable file clobbering. (default: on)\n"
 		}
@@ -843,30 +843,30 @@ static const struct optionw options[] = {
 		{ "Connect timeout in seconds.\n"
 		}
 	},
-	{ "content-disposition", &config.content_disposition, parse_bool, 0, 0,
+	{ "content-disposition", &config.content_disposition, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Take filename from Content-Disposition.\n",
 		  "(default: off)\n"
 		}
 	},
-	{ "content-on-error", &config.content_on_error, parse_bool, 0, 0,
+	{ "content-on-error", &config.content_on_error, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Save response body even on error status.\n",
 		  "(default: off)\n"
 		}
 	},
-	{ "continue", &config.continue_download, parse_bool, 0, 'c',
+	{ "continue", &config.continue_download, parse_bool, -1, 'c',
 		SECTION_DOWNLOAD,
 		{ "Continue download for given files. (default: off)\n"
 		}
 	},
-	{ "convert-links", &config.convert_links, parse_bool, 0, 'k',
+	{ "convert-links", &config.convert_links, parse_bool, -1, 'k',
 		SECTION_DOWNLOAD,
 		{ "Convert embedded URLs to local URLs.\n",
 		  "(default: off)\n"
 		}
 	},
-	{ "cookies", &config.cookies, parse_bool, 0, 0,
+	{ "cookies", &config.cookies, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Enable use of cookies. (default: on)\n"
 		}
@@ -890,17 +890,17 @@ static const struct optionw options[] = {
 		  "components. (default: 0)\n"
 		}
 	},
-	{ "cut-file-get-vars", &config.cut_file_get_vars, parse_bool, 0, 0,
+	{ "cut-file-get-vars", &config.cut_file_get_vars, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Cut HTTP GET vars from file names. (default: off)\n"
 		}
 	},
-	{ "cut-url-get-vars", &config.cut_url_get_vars, parse_bool, 0, 0,
+	{ "cut-url-get-vars", &config.cut_url_get_vars, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Cut HTTP GET vars from URLs. (default: off)\n"
 		}
 	},
-	{ "debug", &config.debug, parse_bool, 0, 'd',
+	{ "debug", &config.debug, parse_bool, -1, 'd',
 		SECTION_STARTUP,
 		{ "Print debugging messages.(default: off)\n"
 		}
@@ -910,12 +910,12 @@ static const struct optionw options[] = {
 		{ "Default file name. (default: index.html)\n"
 		}
 	},
-	{ "delete-after", &config.delete_after, parse_bool, 0, 0,
+	{ "delete-after", &config.delete_after, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Don't save downloaded files. (default: off)\n"
 		}
 	},
-	{ "directories", &config.directories, parse_bool, 0, 0,
+	{ "directories", &config.directories, parse_bool, -1, 0,
 		SECTION_DIRECTORY,
 		{ "Create hierarchy of directories when retrieving\n",
 		  "recursively. (default: on)\n"
@@ -926,7 +926,7 @@ static const struct optionw options[] = {
 		{ "Set directory prefix.\n"
 		}
 	},
-	{ "dns-caching", &config.dns_caching, parse_bool, 0, 0,
+	{ "dns-caching", &config.dns_caching, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Caching of domain name lookups. (default: on)\n"
 		}
@@ -963,46 +963,46 @@ static const struct optionw options[] = {
 		  "e.g. --follow-tags=\"img/data-500px,img/data-hires\n"
 		}
 	},
-	{ "force-atom", &config.force_atom, parse_bool, 0, 0,
+	{ "force-atom", &config.force_atom, parse_bool, -1, 0,
 		SECTION_STARTUP,
 		{ "Treat input file as Atom Feed.\n",
 		  "(default: off) (NEW!)\n"
 		}
 	},
-	{ "force-css", &config.force_css, parse_bool, 0, 0,
+	{ "force-css", &config.force_css, parse_bool, -1, 0,
 		SECTION_STARTUP,
 		{ "Treat input file as CSS. (default: off) (NEW!)\n"
 		}
 	},
-	{ "force-directories", &config.force_directories, parse_bool, 0, 'x',
+	{ "force-directories", &config.force_directories, parse_bool, -1, 'x',
 		SECTION_DIRECTORY,
 		{ "Create hierarchy of directories when not\n",
 		  "retrieving recursively. (default: off)\n"
 		}
 	},
-	{ "force-html", &config.force_html, parse_bool, 0, 'F',
+	{ "force-html", &config.force_html, parse_bool, -1, 'F',
 		SECTION_STARTUP,
 		{ "Treat input file as HTML. (default: off)\n"
 		}
 	},
-	{ "force-metalink", &config.force_metalink, parse_bool, 0, 0,
+	{ "force-metalink", &config.force_metalink, parse_bool, -1, 0,
 		SECTION_STARTUP,
 		{ "Treat input file as Metalink.\n",
 		  "(default: off) (NEW!)\n"
 		}
 	},
-	{ "force-rss", &config.force_rss, parse_bool, 0, 0,
+	{ "force-rss", &config.force_rss, parse_bool, -1, 0,
 		SECTION_STARTUP,
 		{ "Treat input file as RSS Feed.\n",
 		  "(default: off) (NEW!)\n"
 		}
 	},
-	{ "force-sitemap", &config.force_sitemap, parse_bool, 0, 0,
+	{ "force-sitemap", &config.force_sitemap, parse_bool, -1, 0,
 		SECTION_STARTUP,
 		{ "Treat input file as Sitemap. (default: off) (NEW!)\n"
 		}
 	},
-	{ "fsync-policy", &config.fsync_policy, parse_bool, 0, 0,
+	{ "fsync-policy", &config.fsync_policy, parse_bool, -1, 0,
 		SECTION_STARTUP,
 		{ "Use fsync() to wait for data being written to\n",
 		  "the pysical layer. (default: off) (NEW!)\n"
@@ -1026,13 +1026,13 @@ static const struct optionw options[] = {
 		{ "Print this help.\n"
 		}
 	},
-	{ "host-directories", &config.host_directories, parse_bool, 0, 0,
+	{ "host-directories", &config.host_directories, parse_bool, -1, 0,
 		SECTION_DIRECTORY,
 		{ "Create host directories when retrieving\n",
 		  "recursively. (default: on)\n"
 		}
 	},
-	{ "hpkp", &config.hpkp, parse_bool, 0, 0,
+	{ "hpkp", &config.hpkp, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Use HTTP Public Key Pinning (HPKP). (default: on)\n"
 		}
@@ -1043,7 +1043,7 @@ static const struct optionw options[] = {
 		  "(default: ~/.wget-hpkp)\n"
 		}
 	},
-	{ "hsts", &config.hsts, parse_bool, 0, 0,
+	{ "hsts", &config.hsts, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Use HTTP Strict Transport Security (HSTS).\n",
 		  "(default: on)\n"
@@ -1054,17 +1054,17 @@ static const struct optionw options[] = {
 		{ "Set file for HSTS caching. (default: ~/.wget-hsts)\n"
 		}
 	},
-	{ "html-extension", &config.adjust_extension, parse_bool, 0, 0,
+	{ "html-extension", &config.adjust_extension, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Obsoleted by --adjust-extension\n"
 		}
 	}, // obsolete, replaced by --adjust-extension
-	{ "http2", &config.http2, parse_bool, 0, 0,
+	{ "http2", &config.http2, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Use HTTP/2 protocol if possible. (default: on)\n"
 		}
 	},
-	{ "http-keep-alive", &config.keep_alive, parse_bool, 0, 0,
+	{ "http-keep-alive", &config.keep_alive, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Keep connection open for further requests.\n",
 		  "(default: on)\n"
@@ -1094,7 +1094,7 @@ static const struct optionw options[] = {
 		  "(default: empty username)\n"
 		}
 	},
-	{ "https-only", &config.https_only, parse_bool, 0, 0,
+	{ "https-only", &config.https_only, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Do not follow non-secure URLs. (default: off).\n"
 		}
@@ -1111,7 +1111,7 @@ static const struct optionw options[] = {
 		  "(default: empty username)\n"
 		}
 	},
-	{ "ignore-case", &config.ignore_case, parse_bool, 0, 0,
+	{ "ignore-case", &config.ignore_case, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Ignore case when matching files. (default: off)\n"
 		}
@@ -1122,12 +1122,12 @@ static const struct optionw options[] = {
 		  "e.g. --ignore-tags=\"img,a/href\n"
 		}
 	},
-	{ "inet4-only", &config.inet4_only, parse_bool, 0, '4',
+	{ "inet4-only", &config.inet4_only, parse_bool, -1, '4',
 		SECTION_DOWNLOAD,
 		{ "Use IPv4 connections only. (default: off)\n"
 		}
 	},
-	{ "inet6-only", &config.inet6_only, parse_bool, 0, '6',
+	{ "inet6-only", &config.inet6_only, parse_bool, -1, '6',
 		SECTION_DOWNLOAD,
 		{ "Use IPv6 connections only. (default: off)\n"
 		}
@@ -1143,13 +1143,13 @@ static const struct optionw options[] = {
 		{ "File where URLs are read from, - for STDIN.\n"
 		}
 	},
-	{ "iri", NULL, parse_bool, 0, 0,
+	{ "iri", NULL, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Wget dummy option, you can't switch off\n",
 		  "international support\n"
 		}
 	}, // Wget compatibility, in fact a do-nothing option
-	{ "keep-session-cookies", &config.keep_session_cookies, parse_bool, 0, 0,
+	{ "keep-session-cookies", &config.keep_session_cookies, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Also save session cookies. (default: off)\n"
 		}
@@ -1191,7 +1191,7 @@ static const struct optionw options[] = {
 		  "(default: 5) (NEW!)\n"
 		}
 	},
-	{ "metalink", &config.metalink, parse_bool, 0, 0,
+	{ "metalink", &config.metalink, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Follow a metalink file instead of storing it\n",
 		  "(default: on)\n"
@@ -1207,7 +1207,7 @@ static const struct optionw options[] = {
 		{ "Special compatibility option\n"
 		}
 	}, // special Wget compatibility option
-	{ "netrc", &config.netrc, parse_bool, 0, 0,
+	{ "netrc", &config.netrc, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Load credentials from ~/.netrc if not given.\n",
 	      "(default: on)\n"
@@ -1219,7 +1219,7 @@ static const struct optionw options[] = {
 		  "~/.netrc. (default: ~/.netrc)\n"
 		}
 	},
-	{ "ocsp", &config.ocsp, parse_bool, 0, 0,
+	{ "ocsp", &config.ocsp, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Use OCSP server access to verify server's\n",
 		  "certificate. (default: on)\n"
@@ -1231,7 +1231,7 @@ static const struct optionw options[] = {
 		  "(default: ~/.wget-ocsp)\n"
 		}
 	},
-	{ "ocsp-stapling", &config.ocsp_stapling, parse_bool, 0, 0,
+	{ "ocsp-stapling", &config.ocsp_stapling, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Use OCSP stapling to verify the server's\n",
 		  "certificate. (default: on)\n"
@@ -1249,13 +1249,13 @@ static const struct optionw options[] = {
 		  "'-' for STDOUT.\n"
 		}
 	},
-	{ "page-requisites", &config.page_requisites, parse_bool, 0, 'p',
+	{ "page-requisites", &config.page_requisites, parse_bool, -1, 'p',
 		SECTION_DOWNLOAD,
 		{ "Download all necessary files to display a\n",
 		  "HTML page\n"
 		}
 	},
-	{ "parent", &config.parent, parse_bool, 0, 0,
+	{ "parent", &config.parent, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Ascend above parent directory. (default: on)\n"
 		}
@@ -1309,19 +1309,19 @@ static const struct optionw options[] = {
 		  "(default: none)\n"
 		}
 	},
-	{ "protocol-directories", &config.protocol_directories, parse_bool, 0, 0,
+	{ "protocol-directories", &config.protocol_directories, parse_bool, -1, 0,
 		SECTION_DIRECTORY,
 		{ "Force creating protocol directories.\n",
 		  "(default: off)\n"
 		}
 	},
-	{ "proxy", &config.proxy, parse_bool, 0, 0,
+	{ "proxy", &config.proxy, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Enable support for *_proxy environment variables.\n",
 		  "(default: on)\n"
 		}
 	},
-	{ "quiet", &config.quiet, parse_bool, 0, 'q',
+	{ "quiet", &config.quiet, parse_bool, -1, 'q',
 		SECTION_STARTUP,
 		{ "Print no messages except debugging messages.\n",
 		  "(default: off)\n"
@@ -1337,7 +1337,7 @@ static const struct optionw options[] = {
 		{ "File to be used as source of random data.\n"
 		}
 	},
-	{ "random-wait", &config.random_wait, parse_bool, 0, 0,
+	{ "random-wait", &config.random_wait, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Wait 0.5 up to 1.5*<--wait> seconds between\n",
 		  "downloads (per thread). (default: off)\n"
@@ -1348,7 +1348,7 @@ static const struct optionw options[] = {
 		{ "Read and write timeout in seconds.\n"
 		}
 	},
-	{ "recursive", &config.recursive, parse_bool, 0, 'r',
+	{ "recursive", &config.recursive, parse_bool, -1, 'r',
 		SECTION_DOWNLOAD,
 		{ "Recursive download. (default: off)\n"
 		}
@@ -1378,7 +1378,7 @@ static const struct optionw options[] = {
 		  "uppercase, none\n"
 		}
 	},
-	{ "robots", &config.robots, parse_bool, 0, 0,
+	{ "robots", &config.robots, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Respect robots.txt standard for recursive\n",
 		  "downloads. (default: on)\n"
@@ -1389,7 +1389,7 @@ static const struct optionw options[] = {
 		{ "Save cookies to file.\n"
 		}
 	},
-	{ "save-headers", &config.save_headers, parse_bool, 0, 0,
+	{ "save-headers", &config.save_headers, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Save the response headers in front of the response\n",
 		  "data. (default: off)\n"
@@ -1402,28 +1402,28 @@ static const struct optionw options[] = {
 		  "strings, e.g. NORMAL:-VERS-SSL3.0:-RSA\n"
 		}
 	},
-	{ "server-response", &config.server_response, parse_bool, 0, 'S',
+	{ "server-response", &config.server_response, parse_bool, -1, 'S',
 		SECTION_DOWNLOAD,
 		{ "Print the server response headers. (default: off)\n"
 		}
 	},
-	{ "span-hosts", &config.span_hosts, parse_bool, 0, 'H',
+	{ "span-hosts", &config.span_hosts, parse_bool, -1, 'H',
 		SECTION_DOWNLOAD,
 		{ "Span hosts that were not given on the\n",
 		  "command line. (default: off)\n"
 		}
 	},
-	{ "spider", &config.spider, parse_bool, 0, 0,
+	{ "spider", &config.spider, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Enable web spider mode. (default: off)\n"
 		}
 	},
-	{ "strict-comments", &config.strict_comments, parse_bool, 0, 0,
+	{ "strict-comments", &config.strict_comments, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "A dummy option. Parsing always works non-strict.\n"
 		}
 	},
-	{ "tcp-fastopen", &config.tcp_fastopen, parse_bool, 0, 0,
+	{ "tcp-fastopen", &config.tcp_fastopen, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Enable TCP Fast Open (TFO). (default: on)\n"
 		}
@@ -1433,19 +1433,19 @@ static const struct optionw options[] = {
 		{ "General network timeout in seconds.\n"
 		}
 	},
-	{ "timestamping", &config.timestamping, parse_bool, 0, 'N',
+	{ "timestamping", &config.timestamping, parse_bool, -1, 'N',
 		SECTION_DOWNLOAD,
 		{ "Just retrieve younger files than the local ones.\n",
 		  "(default: off)\n"
 		}
 	},
-	{ "tls-false-start", &config.tls_false_start, parse_bool, 0, 0,
+	{ "tls-false-start", &config.tls_false_start, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Enable TLS False Start (needs GnuTLS 3.5+).\n",
 		  "(default: on)\n"
 		}
 	},
-	{ "tls-resume", &config.tls_resume, parse_bool, 0, 0,
+	{ "tls-resume", &config.tls_resume, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Enable TLS Session Resumption. (default: on)\n"
 		}
@@ -1461,7 +1461,7 @@ static const struct optionw options[] = {
 		{ "Number of tries for each download. (default 20)\n"
 		}
 	},
-	{ "trust-server-names", &config.trust_server_names, parse_bool, 0, 0,
+	{ "trust-server-names", &config.trust_server_names, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "On redirection use the server's filename.\n",
 		  "(default: off)\n"
@@ -1479,13 +1479,13 @@ static const struct optionw options[] = {
 		  "(default: empty username)\n"
 		}
 	},
-	{ "use-server-timestamps", &config.use_server_timestamps, parse_bool, 0, 0,
+	{ "use-server-timestamps", &config.use_server_timestamps, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Set local file's timestamp to server's timestamp.\n",
 		  "(default: on)\n"
 		}
 	},
-	{ "verbose", &config.verbose, parse_bool, 0, 'v',
+	{ "verbose", &config.verbose, parse_bool, -1, 'v',
 		SECTION_STARTUP,
 		{ "Print more messages. (default: on)\n"\
 		}
@@ -1507,7 +1507,7 @@ static const struct optionw options[] = {
 		  "(per thread). (default: 10)\n"
 		}
 	},
-	{ "xattr", &config.xattr, parse_bool, 0, 0,
+	{ "xattr", &config.xattr, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Save extended file attributes. (default: on)\n"\
 		}
@@ -1616,53 +1616,50 @@ static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char
 	if (!opt)
 		error_printf_exit(_("Unknown option '%s'\n"), name);
 
-	if (!value_present && opt->parser == parse_bool)
-		value = NULL;
-
-	debug_printf("name=%s value=%s invert=%d\n", opt->long_name, value, invert);
-
-	if (invert && (opt->parser == parse_string ||
-				opt->parser == parse_stringset ||
-				opt->parser == parse_stringlist ||
-				opt->parser == parse_filename ||
-				opt->parser == parse_filenames)) {
-		// allow no-<option> to set value to NULL
-		if (value && value_present)
-			error_printf_exit(_("Option 'no-%s' doesn't allow an argument\n"), name);
-
-		opt->parser(opt, NULL);
-	}
-	else {
-		if (value && !opt->args && opt->parser != parse_bool && !value_is_next_arg)
-			error_printf_exit(_("Option '%s' doesn't allow an argument\n"), name);
-
-		if (opt->args > 0) {
+	if (value_present) {
+		// "option=arg"
+		if (invert) {
+			if (!opt->args || opt->parser == parse_string ||
+					opt->parser == parse_stringset ||
+					opt->parser == parse_stringlist ||
+					opt->parser == parse_filename ||
+					opt->parser == parse_filenames)
+				error_printf_exit(_("Option 'no-%s' doesn't allow an argument\n"), name);
+		} else if (!opt->args)
+				error_printf_exit(_("Option '%s' doesn't allow an argument\n"), name);
+	} else {
+		// "option"
+		switch (opt->args) {
+		case 0:
+			value = NULL;
+			break;
+		case 1:
 			if (!value)
 				error_printf_exit(_("Missing argument for option '%s'\n"), name);
 
-			opt->parser(opt, value);
-
-			if (!value_present)
-				ret = opt->args;
-		}
-		else if (opt->args == 0) {
-			if (opt->parser == parse_bool) {
-				opt->parser(opt, value);
-
-				if (invert && opt->var)
-					*((char *)opt->var) = !*((char *)opt->var); // invert boolean value
-			} else
-				opt->parser(opt, NULL);
-		}
-		else {
-			//option with optional argument cannot consume next
-			//commandline argument.
-			if (!value_present && value_is_next_arg)
+			if (invert && (opt->parser == parse_string ||
+					opt->parser == parse_stringset ||
+					opt->parser == parse_stringlist ||
+					opt->parser == parse_filename ||
+					opt->parser == parse_filenames))
 				value = NULL;
-
-			opt->parser(opt, value);
+			else
+				ret = opt->args;
+			break;
+		case -1:
+			if (value_is_next_arg)
+				value = NULL;
+			else
+				ret = 1;
+			break;
+		default:
+			break;
 		}
 	}
+
+	opt->parser(opt, value);
+	if (invert && (opt->parser ==  parse_bool) && opt->var)
+		*((char *)opt->var) = !*((char *)opt->var);
 
 	return ret;
 }
@@ -1912,16 +1909,15 @@ static int G_GNUC_WGET_NONNULL((2)) parse_command_line(int argc, const char **ar
 						val = argp[pos + 1] ? argp + pos + 1 : argv[++n];
 						n += opt->parser(opt, val);
 						break;
-					} else if (opt->args == 0)
+					} else //if (opt->args == 0)
 						opt->parser(opt, NULL);
-					else
-					{
+/*					else {
 						const char *val;
 						val = argp[pos + 1] ? argp + pos + 1 : NULL;
 						n += opt->parser(opt, val);
 						break;
 					}
-				} else
+*/				} else
 					error_printf_exit(_("Unknown option '-%c'\n"), argp[pos]);
 			}
 		}
