@@ -736,6 +736,7 @@ static int parse_execute(option_t opt, const char *val);
 static const struct optionw options[] = {
 	// long name, config variable, parse function, number of arguments, short name
 	// leave the entries in alphabetical order of 'long_name' !
+	// Ignore '-' and '_' while forming the order
 	{ "accept", &config.accept_patterns, parse_stringlist, 1, 'A',
 		SECTION_DOWNLOAD,
 		{ "Comma-separated list of file name suffixes or\n",
@@ -783,14 +784,14 @@ static const struct optionw options[] = {
 		{ "File with bundle of PEM CA certificates.\n"
 		}
 	},
-	{ "ca-directory", &config.ca_directory, parse_string, 1, 0,
-		SECTION_SSL,
-		{ "Directory with PEM CA certificates.\n"
-		}
-	},
 	{ "cache", &config.cache, parse_bool, 0, 0,
 		SECTION_DOWNLOAD,
 		{ "Enabled using of server cache. (default: on)\n"
+		}
+	},
+	{ "ca-directory", &config.ca_directory, parse_string, 1, 0,
+		SECTION_SSL,
+		{ "Directory with PEM CA certificates.\n"
 		}
 	},
 	{ "certificate", &config.cert_file, parse_string, 1, 0,
@@ -865,17 +866,17 @@ static const struct optionw options[] = {
 		  "(default: off)\n"
 		}
 	},
+	{ "cookies", &config.cookies, parse_bool, 0, 0,
+		SECTION_HTTP,
+		{ "Enable use of cookies. (default: on)\n"
+		}
+	},
 	{ "cookie-suffixes", &config.cookie_suffixes, parse_string, 1, 0,
 		SECTION_HTTP,
 		{ "Load public suffixes from file. \n",
 		  "They prevent 'supercookie' vulnerabilities.\n",
 		  "Download the list with:\n",
 		  "wget -O suffixes.txt https://publicsuffix.org/list/effective_tld_names.dat\n"
-		}
-	},
-	{ "cookies", &config.cookies, parse_bool, 0, 0,
-		SECTION_HTTP,
-		{ "Enable use of cookies. (default: on)\n"
 		}
 	},
 	{ "crl-file", &config.crl_file, parse_filename, 1, 0,
@@ -1058,6 +1059,11 @@ static const struct optionw options[] = {
 		{ "Obsoleted by --adjust-extension\n"
 		}
 	}, // obsolete, replaced by --adjust-extension
+	{ "http2", &config.http2, parse_bool, 0, 0,
+		SECTION_SSL,
+		{ "Use HTTP/2 protocol if possible. (default: on)\n"
+		}
+	},
 	{ "http-keep-alive", &config.keep_alive, parse_bool, 0, 0,
 		SECTION_HTTP,
 		{ "Keep connection open for further requests.\n",
@@ -1088,17 +1094,6 @@ static const struct optionw options[] = {
 		  "(default: empty username)\n"
 		}
 	},
-	{ "http-user", &config.http_username, parse_string, 1, 0,
-		SECTION_HTTP,
-		{ "Username for HTTP Authentication.\n",
-		  "(default: empty username)\n"
-		}
-	},
-	{ "http2", &config.http2, parse_bool, 0, 0,
-		SECTION_SSL,
-		{ "Use HTTP/2 protocol if possible. (default: on)\n"
-		}
-	},
 	{ "https-only", &config.https_only, parse_bool, 0, 0,
 		SECTION_SSL,
 		{ "Do not follow non-secure URLs. (default: off).\n"
@@ -1108,6 +1103,12 @@ static const struct optionw options[] = {
 		SECTION_SSL,
 		{ "Set HTTPS proxy/proxies, overriding environment\n",
 		  "variables. Use comma to separate proxies.\n"
+		}
+	},
+	{ "http-user", &config.http_username, parse_string, 1, 0,
+		SECTION_HTTP,
+		{ "Username for HTTP Authentication.\n",
+		  "(default: empty username)\n"
 		}
 	},
 	{ "ignore-case", &config.ignore_case, parse_bool, 0, 0,
@@ -1466,12 +1467,6 @@ static const struct optionw options[] = {
 		  "(default: off)\n"
 		}
 	},
-	{ "use-server-timestamps", &config.use_server_timestamps, parse_bool, 0, 0,
-		SECTION_DOWNLOAD,
-		{ "Set local file's timestamp to server's timestamp.\n",
-		  "(default: on)\n"
-		}
-	},
 	{ "user", &config.username, parse_string, 1, 0,
 		SECTION_DOWNLOAD,
 		{ "Username for Authentication.\n",
@@ -1482,6 +1477,12 @@ static const struct optionw options[] = {
 		SECTION_HTTP,
 		{ "Username for Authentication.\n",
 		  "(default: empty username)\n"
+		}
+	},
+	{ "use-server-timestamps", &config.use_server_timestamps, parse_bool, 0, 0,
+		SECTION_DOWNLOAD,
+		{ "Set local file's timestamp to server's timestamp.\n",
+		  "(default: on)\n"
 		}
 	},
 	{ "verbose", &config.verbose, parse_bool, 0, 'v',
