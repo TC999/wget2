@@ -51,6 +51,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <ctype.h>
 //#include <netdb.h>
 
 #include <wget.h>
@@ -1575,19 +1576,16 @@ static int G_GNUC_WGET_NORETURN print_help(G_GNUC_WGET_UNUSED option_t opt, G_GN
 
 static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare(const void *key, const void *option)
 {
-	return strcmp((const char *)key, ((const option_t)option)->long_name);
-}
+	const char *s1 = key, *s2 = ((const option_t)option)->long_name;
 
-static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_execute(const char *s1, const char *s2)
-{
 	while (*s1 && *s2) {
 		if (*s1 == '-' || *s1 == '_') s1++;
 		if (*s2 == '-' || *s2 == '_') s2++;
-		if (*s1 != *s2) break;
+		if ((*s1 != *s2) && (tolower((unsigned char)*s1) != *s2)) break;
 		s1++; s2++;
 	}
 
-	return *s1 - *s2;
+	return tolower((unsigned char)*s1) - *s2;
 }
 
 static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char *value, int value_is_next_arg)
@@ -1611,19 +1609,8 @@ static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char
 		invert = 1;
 		name += 3;
 	}
-	opt = bsearch(name, options, countof(options), sizeof(options[0]), opt_compare);
 
-	if (!opt) {
-		// Fallback to linear search for 'unsharp' searching.
-		// Maybe the user asked for e.g. https_only or httpsonly instead of https-only
-		// opt_compare_execute() will find these. Wget -e/--execute compatibility.
-		for (unsigned it = 0; it < countof(options); it++) {
-			if (opt_compare_execute(name, options[it].long_name) == 0) {
-				opt = &options[it];
-				break;
-			}
-		}
-	}
+	opt = bsearch(name, options, countof(options), sizeof(options[0]), opt_compare);
 
 	if (!opt)
 		error_printf_exit(_("Unknown option '%s'\n"), name);
@@ -1692,7 +1679,7 @@ static int _parse_option(char *linep, char **name, char **val)
 	int quote;
 
 	while (c_isspace(*linep)) linep++;
-	for (*name = linep; c_isalnum(*linep) || *linep == '-'; linep++);
+	for (*name = linep; c_isalnum(*linep) || *linep == '-' || *linep == '_'; linep++);
 
 	if (!**name) {
 		error_printf(_("Failed to parse: '%s'\n"), linep);
