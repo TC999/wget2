@@ -261,7 +261,7 @@ static int parse_string(option_t opt, const char *val)
 {
 	// the strdup'ed string will be released on program exit
 	xfree(*((const char **)opt->var));
-	*((const char **)opt->var) = val ? wget_strdup(val) : NULL;
+	*((const char **)opt->var) = (val ? wget_strdup(val) : NULL);
 
 	return 0;
 }
@@ -1582,19 +1582,39 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare(const void *key,
 	while (*s1 && *s2) {
 		if (*s1 == '-' || *s1 == '_') s1++;
 		if (*s2 == '-' || *s2 == '_') s2++;
+		if (*s1 != *s2) break;
+		s1++; s2++;
+	}
+
+//debug_printf("key = %s ((const option_t)option)->long_name = %s\n", (char *)key, ((const option_t)option)->long_name);
+//debug_printf("*s1 = %c *s2 = %c (*s1 - *s2) = %d\n", *s1, *s2, *s1 - *s2);
+
+	return *s1 - *s2;
+}
+
+/* .wgetrc commands are case-, underscore-, and minus- insensitive */
+static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_config(const void *key, const void *option)
+{
+	const char *s1 = key, *s2 = ((const option_t)option)->long_name;
+
+	while (*s1 && *s2) {
+		while (*s1 == '-' || *s1 == '_') s1++;
+		while (*s2 == '-' || *s2 == '_') s2++;
 		if ((*s1 != *s2) && (tolower((unsigned char)*s1) != *s2)) break;
+		//*s2 is guaranteed to be lower case so convert *s1 to lower case
 		s1++; s2++;
 	}
 
 	return tolower((unsigned char)*s1) - *s2;
 }
 
-static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char *value, int value_is_next_arg)
+static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char *value, char parsing_config)
 {
 	option_t opt;
 	int invert = 0, ret = 0;
 	char namebuf[strlen(name) + 1], *p;
 	int value_present = 0;
+	int (*compare_fn)(const void *, const void *);
 
 	if ((p = strchr(name, '='))) {
 		// option with appended value
@@ -1611,10 +1631,17 @@ static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char
 		name += 3;
 	}
 
-	opt = bsearch(name, options, countof(options), sizeof(options[0]), opt_compare);
+	if (parsing_config)
+		compare_fn = opt_compare_config;
+	else
+		compare_fn = opt_compare;
+
+	opt = bsearch(name, options, countof(options), sizeof(options[0]), compare_fn);
 
 	if (!opt)
 		error_printf_exit(_("Unknown option '%s'\n"), name);
+
+	debug_printf("name=%s value=%s invert=%d\n", opt->long_name, value, invert);
 
 	if (value_present) {
 		// "option=arg"
@@ -1647,9 +1674,9 @@ static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char
 				ret = opt->args;
 			break;
 		case -1:
-			if (value_is_next_arg)
+			if (!parsing_config)
 				value = NULL;
-			else
+			else if(value)
 				ret = 1;
 			break;
 		default:
@@ -1814,7 +1841,7 @@ static int G_GNUC_WGET_NONNULL((1)) _read_config(const char *cfgfile, int expand
 
 		if (found == 1) {
 			// debug_printf("%s = %s\n",name,val);
-			set_long_option(name, val, 0);
+			set_long_option(name, val, 1);
 		} else if (found == 2) {
 			// debug_printf("%s %s\n",name,val);
 			if (!strcmp(name, "include")) {
@@ -1889,7 +1916,7 @@ static int G_GNUC_WGET_NONNULL((2)) parse_command_line(int argc, const char **ar
 			if (argp[2] == 0)
 				return n + 1;
 
-			n += set_long_option(argp + 2, n < argc - 1 ? argv[n+1] : NULL, 1);
+			n += set_long_option(argp + 2, n < argc - 1 ? argv[n+1] : NULL, 0);
 
 		} else if (argp[1]) {
 			// short option(s)
