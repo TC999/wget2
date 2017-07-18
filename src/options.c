@@ -1588,15 +1588,17 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_config(const voi
 	const char *s1 = key, *s2 = ((const option_t)option)->long_name;
 
 	while (*s1 && *s2) {
-		if ((*s2 == '-' || *s2 == '_') && (*s1 == '-' || *s1 == '_'))
+		if ((*s2 == '-' || *s2 == '_') && (*s1 == '-' || *s1 == '_')) {
 			s1++, s2++;
+			continue;
+		}
 
-		if ((*s1 != *s2) && (tolower((unsigned char)*s1) != *s2)) break;
-		//*s2 is guaranteed to be lower case so convert *s1 to lower case
+		if ((*s1 != *s2) && (c_tolower((unsigned char)*s1) != *s2)) break;
+		// *s2 is guaranteed to be lower case so convert *s1 to lower case
 		s1++; s2++;
 	}
 
-	return tolower((unsigned char)*s1) - *s2;
+	return c_tolower((unsigned char)*s1) - *s2;
 }
 
 static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char *value, char parsing_config)
