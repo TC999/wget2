@@ -736,7 +736,6 @@ static int parse_execute(option_t opt, const char *val);
 static const struct optionw options[] = {
 	// long name, config variable, parse function, number of arguments, short name
 	// leave the entries in alphabetical order of 'long_name' !
-	// Ignore '-' and '_' while forming the order
 	{ "accept", &config.accept_patterns, parse_stringlist, 1, 'A',
 		SECTION_DOWNLOAD,
 		{ "Comma-separated list of file name suffixes or\n",
@@ -1584,15 +1583,17 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare(const void *key,
 	return *s1 - *s2;
 }
 
-/* .wgetrc commands are case-, underscore-, and minus- insensitive */
 static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_config(const void *key, const void *option)
 {
 	const char *s1 = key, *s2 = ((const option_t)option)->long_name;
+	char only_s2_went_ahead;
 
-	while (*s1 && *s2) {
+	while ((only_s2_went_ahead = 0, *s1) && *s2) {
 		if (*s2 == '-' || *s2 == '_') {
 			if (*s1 == '-' || *s1 == '_')
 				s1++;
+			else
+				only_s2_went_ahead = 1;
 			s2++;
 		}
 
@@ -1600,6 +1601,12 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_config(const voi
 		//*s2 is guaranteed to be lower case so convert *s1 to lower case
 		s1++; s2++;
 	}
+
+	if (only_s2_went_ahead)
+		s2--;
+
+//debug_printf("key = %s ((const option_t)option)->long_name = %s\n", (char *)key, ((const option_t)option)->long_name);
+//debug_printf("tolower((unsigned char)*s1) - *s2 = %d tolower((unsigned char)*s1) = %c *s2 = %c\n", tolower((unsigned char)*s1) - *s2, tolower((unsigned char)*s1), *s2);
 
 	return tolower((unsigned char)*s1) - *s2;
 }
@@ -2352,21 +2359,39 @@ int selftest_options(void)
 	int ret = 0;
 	size_t it;
 
-	// check if all options are in order
+	// check if all options are in order (using opt_compare)
 
 	for (it = 1; it < countof(options); it++) {
 		if (opt_compare(options[it - 1].long_name, &options[it]) > 0) {
-			error_printf("%s: Option not in order '%s' after '%s'\n", __func__, options[it].long_name, options[it - 1].long_name);
+			error_printf("%s: Option not in order '%s' after '%s' (using opt_compare())\n", __func__, options[it].long_name, options[it - 1].long_name);
 			ret = 1;
 		}
 	}
 
-	// check if all options are available
+	// check if all options are in order (using opt_compare_config)
+
+	for (it = 1; it < countof(options); it++) {
+		if (opt_compare_config(options[it - 1].long_name, &options[it]) > 0) {
+			error_printf("%s: Option not in order '%s' after '%s' (using opt_compare_config())\n", __func__, options[it].long_name, options[it - 1].long_name);
+			ret = 1;
+		}
+	}
+
+	// check if all options are available (using opt_compare)
 
 	for (it = 0; it < countof(options); it++) {
 		option_t opt = bsearch(options[it].long_name, options, countof(options), sizeof(options[0]), opt_compare);
 		if (!opt) {
-			error_printf("%s: Failed to find option '%s'\n", __func__, options[it].long_name);
+			error_printf("%s: Failed to find option '%s' (using opt_compare())\n", __func__, options[it].long_name);
+			ret = 1;
+		}
+	}
+
+	// check if all options are available (using opt_compare_config)
+	for (it = 0; it < countof(options); it++) {
+		option_t opt = bsearch(options[it].long_name, options, countof(options), sizeof(options[0]), opt_compare_config);
+		if (!opt) {
+			error_printf("%s: Failed to find option '%s' (using opt_compare_config())\n", __func__, options[it].long_name);
 			ret = 1;
 		}
 	}
