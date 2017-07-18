@@ -784,14 +784,14 @@ static const struct optionw options[] = {
 		{ "File with bundle of PEM CA certificates.\n"
 		}
 	},
-	{ "cache", &config.cache, parse_bool, -1, 0,
-		SECTION_DOWNLOAD,
-		{ "Enabled using of server cache. (default: on)\n"
-		}
-	},
 	{ "ca-directory", &config.ca_directory, parse_string, 1, 0,
 		SECTION_SSL,
 		{ "Directory with PEM CA certificates.\n"
+		}
+	},
+	{ "cache", &config.cache, parse_bool, -1, 0,
+		SECTION_DOWNLOAD,
+		{ "Enabled using of server cache. (default: on)\n"
 		}
 	},
 	{ "certificate", &config.cert_file, parse_string, 1, 0,
@@ -866,17 +866,17 @@ static const struct optionw options[] = {
 		  "(default: off)\n"
 		}
 	},
-	{ "cookies", &config.cookies, parse_bool, -1, 0,
-		SECTION_HTTP,
-		{ "Enable use of cookies. (default: on)\n"
-		}
-	},
 	{ "cookie-suffixes", &config.cookie_suffixes, parse_string, 1, 0,
 		SECTION_HTTP,
 		{ "Load public suffixes from file. \n",
 		  "They prevent 'supercookie' vulnerabilities.\n",
 		  "Download the list with:\n",
 		  "wget -O suffixes.txt https://publicsuffix.org/list/effective_tld_names.dat\n"
+		}
+	},
+	{ "cookies", &config.cookies, parse_bool, -1, 0,
+		SECTION_HTTP,
+		{ "Enable use of cookies. (default: on)\n"
 		}
 	},
 	{ "crl-file", &config.crl_file, parse_filename, 1, 0,
@@ -1059,11 +1059,6 @@ static const struct optionw options[] = {
 		{ "Obsoleted by --adjust-extension\n"
 		}
 	}, // obsolete, replaced by --adjust-extension
-	{ "http2", &config.http2, parse_bool, -1, 0,
-		SECTION_SSL,
-		{ "Use HTTP/2 protocol if possible. (default: on)\n"
-		}
-	},
 	{ "http-keep-alive", &config.keep_alive, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Keep connection open for further requests.\n",
@@ -1094,6 +1089,17 @@ static const struct optionw options[] = {
 		  "(default: empty username)\n"
 		}
 	},
+	{ "http-user", &config.http_username, parse_string, 1, 0,
+		SECTION_HTTP,
+		{ "Username for HTTP Authentication.\n",
+		  "(default: empty username)\n"
+		}
+	},
+	{ "http2", &config.http2, parse_bool, -1, 0,
+		SECTION_SSL,
+		{ "Use HTTP/2 protocol if possible. (default: on)\n"
+		}
+	},
 	{ "https-only", &config.https_only, parse_bool, -1, 0,
 		SECTION_SSL,
 		{ "Do not follow non-secure URLs. (default: off).\n"
@@ -1103,12 +1109,6 @@ static const struct optionw options[] = {
 		SECTION_SSL,
 		{ "Set HTTPS proxy/proxies, overriding environment\n",
 		  "variables. Use comma to separate proxies.\n"
-		}
-	},
-	{ "http-user", &config.http_username, parse_string, 1, 0,
-		SECTION_HTTP,
-		{ "Username for HTTP Authentication.\n",
-		  "(default: empty username)\n"
 		}
 	},
 	{ "ignore-case", &config.ignore_case, parse_bool, -1, 0,
@@ -1467,6 +1467,12 @@ static const struct optionw options[] = {
 		  "(default: off)\n"
 		}
 	},
+	{ "use-server-timestamps", &config.use_server_timestamps, parse_bool, -1, 0,
+		SECTION_DOWNLOAD,
+		{ "Set local file's timestamp to server's timestamp.\n",
+		  "(default: on)\n"
+		}
+	},
 	{ "user", &config.username, parse_string, 1, 0,
 		SECTION_DOWNLOAD,
 		{ "Username for Authentication.\n",
@@ -1477,12 +1483,6 @@ static const struct optionw options[] = {
 		SECTION_HTTP,
 		{ "Username for Authentication.\n",
 		  "(default: empty username)\n"
-		}
-	},
-	{ "use-server-timestamps", &config.use_server_timestamps, parse_bool, -1, 0,
-		SECTION_DOWNLOAD,
-		{ "Set local file's timestamp to server's timestamp.\n",
-		  "(default: on)\n"
 		}
 	},
 	{ "verbose", &config.verbose, parse_bool, -1, 'v',
@@ -1579,15 +1579,7 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare(const void *key,
 {
 	const char *s1 = key, *s2 = ((const option_t)option)->long_name;
 
-	while (*s1 && *s2) {
-		if (*s1 == '-' || *s1 == '_') s1++;
-		if (*s2 == '-' || *s2 == '_') s2++;
-		if (*s1 != *s2) break;
-		s1++; s2++;
-	}
-
-//debug_printf("key = %s ((const option_t)option)->long_name = %s\n", (char *)key, ((const option_t)option)->long_name);
-//debug_printf("*s1 = %c *s2 = %c (*s1 - *s2) = %d\n", *s1, *s2, *s1 - *s2);
+	for (; *s1 && (*s1 == *s2); s1++, s2++);
 
 	return *s1 - *s2;
 }
@@ -1598,8 +1590,12 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_config(const voi
 	const char *s1 = key, *s2 = ((const option_t)option)->long_name;
 
 	while (*s1 && *s2) {
-		while (*s1 == '-' || *s1 == '_') s1++;
-		while (*s2 == '-' || *s2 == '_') s2++;
+		if (*s2 == '-' || *s2 == '_') {
+			if (*s1 == '-' || *s1 == '_')
+				s1++;
+			s2++;
+		}
+
 		if ((*s1 != *s2) && (tolower((unsigned char)*s1) != *s2)) break;
 		//*s2 is guaranteed to be lower case so convert *s1 to lower case
 		s1++; s2++;
@@ -1611,7 +1607,7 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_config(const voi
 static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char *value, char parsing_config)
 {
 	option_t opt;
-	int invert = 0, ret = 0;
+	int invert = 0, ret = 0, case_insensitive = 1;
 	char namebuf[strlen(name) + 1], *p;
 	int value_present = 0;
 	int (*compare_fn)(const void *, const void *);
@@ -1625,13 +1621,18 @@ static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char
 		value_present = 1;
 	}
 
+	// If the option is  passed from .wget2rc (--*), delete the "--" prefix
+	if (!strncmp(name, "--", 2)) {
+		case_insensitive = 0;
+		name += 2;
+	}
 	// If the option is negated (--no-) delete the "no-" prefix
 	if (!strncmp(name, "no-", 3)) {
 		invert = 1;
 		name += 3;
 	}
 
-	if (parsing_config)
+	if (parsing_config && case_insensitive)
 		compare_fn = opt_compare_config;
 	else
 		compare_fn = opt_compare;
@@ -1694,7 +1695,7 @@ static int G_GNUC_WGET_NONNULL((1)) set_long_option(const char *name, const char
 static int parse_execute(G_GNUC_WGET_UNUSED option_t opt, const char *val)
 {
 	// info_printf("### argv=%s val=%s\n",argv[0],val);
-	set_long_option(val, NULL, 0);
+	set_long_option(val, NULL, 1);
 
 	return 0;
 }
