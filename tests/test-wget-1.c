@@ -240,7 +240,7 @@ int main(void)
 
 	// test--HTTP-content-disposition
 	wget_test(
-		WGET_TEST_OPTIONS, "-e contentdisposition=on",
+		WGET_TEST_OPTIONS, "-e content-disposition=on",
 		WGET_TEST_REQUEST_URL, "dummy.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
@@ -250,7 +250,7 @@ int main(void)
 
 	// test--HTTP-content-disposition-1
 	wget_test(
-		WGET_TEST_OPTIONS, "-e contentdisposition=on",
+		WGET_TEST_OPTIONS, "-e content-disposition=on",
 		WGET_TEST_REQUEST_URL, "dummy.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
@@ -283,7 +283,7 @@ int main(void)
 	// test--HTTP-content-disposition-RFC6266
 #define ccedilla_u8 "\xC3\xA7"
 	wget_test(
-		WGET_TEST_OPTIONS, "-e contentdisposition=on --local-encoding=utf-8",
+		WGET_TEST_OPTIONS, "-e content-disposition=on --local-encoding=utf-8",
 		WGET_TEST_REQUEST_URL, "dummy2.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {

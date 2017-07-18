@@ -1586,27 +1586,15 @@ static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare(const void *key,
 static int G_GNUC_WGET_PURE G_GNUC_WGET_NONNULL_ALL opt_compare_config(const void *key, const void *option)
 {
 	const char *s1 = key, *s2 = ((const option_t)option)->long_name;
-	char only_s2_went_ahead;
 
-	while ((only_s2_went_ahead = 0, *s1) && *s2) {
-		if (*s2 == '-' || *s2 == '_') {
-			if (*s1 == '-' || *s1 == '_')
-				s1++;
-			else
-				only_s2_went_ahead = 1;
-			s2++;
-		}
+	while (*s1 && *s2) {
+		if ((*s2 == '-' || *s2 == '_') && (*s1 == '-' || *s1 == '_'))
+			s1++, s2++;
 
 		if ((*s1 != *s2) && (tolower((unsigned char)*s1) != *s2)) break;
 		//*s2 is guaranteed to be lower case so convert *s1 to lower case
 		s1++; s2++;
 	}
-
-	if (only_s2_went_ahead)
-		s2--;
-
-//debug_printf("key = %s ((const option_t)option)->long_name = %s\n", (char *)key, ((const option_t)option)->long_name);
-//debug_printf("tolower((unsigned char)*s1) - *s2 = %d tolower((unsigned char)*s1) = %c *s2 = %c\n", tolower((unsigned char)*s1) - *s2, tolower((unsigned char)*s1), *s2);
 
 	return tolower((unsigned char)*s1) - *s2;
 }
