@@ -1140,8 +1140,8 @@ static int try_connection(DOWNLOADER *downloader, wget_iri_t *iri)
 
 	if ((conn = downloader->conn)) {
 		if (!wget_strcmp(wget_http_get_host(conn), iri->host) &&
-			wget_http_get_scheme(conn) == iri->scheme &&
-			!wget_strcmp(wget_http_get_port(conn), iri->resolv_port))
+			!wget_strcmp(wget_http_get_scheme(conn), iri->scheme) &&
+			((int *) wget_http_get_port(conn) == (int *) iri->resolv_port))
 		{
 			debug_printf("reuse connection %s\n", wget_http_get_host(conn));
 			return WGET_E_SUCCESS;
