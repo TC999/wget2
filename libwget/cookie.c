@@ -136,7 +136,7 @@ static int G_GNUC_WGET_NONNULL_ALL G_GNUC_WGET_PURE _compare_cookie(const wget_c
 // this is how we sort the entries when constructing a Cookie: header field
 static int G_GNUC_WGET_NONNULL_ALL G_GNUC_WGET_PURE _compare_cookie2(const wget_cookie_t *c1, const wget_cookie_t *c2)
 {
-	int n;
+	size_t n;
 
 	// RFC 6265 5.4 demands sorting by 1. longer paths first, 2. earlier creation time first.
 
@@ -145,7 +145,7 @@ static int G_GNUC_WGET_NONNULL_ALL G_GNUC_WGET_PURE _compare_cookie2(const wget_
 		// n = c1->creation - c2->creation;
 	}
 
-	return n;
+	return (int)n;
 }
 
 static int G_GNUC_WGET_NONNULL_ALL _domain_match(const char *domain, const char *host)
