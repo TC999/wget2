@@ -74,12 +74,53 @@
 #	define GCC_VERSION_AT_LEAST(major, minor) 0
 #endif
 
+/*
+ * The following code for defining G_GNUC_WGET_NORETURN and
+ * G_GNUC_WGET_NORETURN_FUNCPTR was taken from the gnulib module noreturn and
+ * slightly modified to remove C++ specific code.
+ */
+
+/* Declares that a function is nonreturning.
+   Use in C only code:
+     _GL_NORETURN_FUNC extern void func (void);
+     extern _GL_NORETURN_FUNC void func (void);
+     extern void _GL_NORETURN_FUNC func (void);
+   Use in C & C++ code for a function with current language linkage:
+     _GL_NORETURN_FUNC extern void func (void);
+ */
+#if (3 <= __GNUC__ || (__GNUC__ == 2 && 8 <= __GNUC_MINOR__)) \
+    || (0x5110 <= __SUNPRO_C)
+  /* For compatibility with _GL_NORETURN_FUNCPTR on clang, use
+     __attribute__((__noreturn__)), not _Noreturn.  */
+# define G_GNUC_WGET_NORETURN __attribute__ ((__noreturn__))
+#elif 1200 <= _MSC_VER
+  /* Use MSVC specific syntax.  */
+# define G_GNUC_WGET_NORETURN __declspec (noreturn)
+#else
+  /* Use ISO C11 syntax when the compiler supports it.  */
+# if __STDC_VERSION__ >= 201112 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
+#  define G_GNUC_WGET_NORETURN _Noreturn
+# else
+#  define G_GNUC_WGET_NORETURN /* empty */
+# endif
+#endif
+
+/* Declares that a function is nonreturning.
+   Use in types and declarations that involve function pointers:
+     _GL_NORETURN_FUNCPTR void (*funcptr) (void);
+ */
+#if (3 <= __GNUC__ || (__GNUC__ == 2 && 8 <= __GNUC_MINOR__)) \
+    || (0x5110 <= __SUNPRO_C)
+# define G_GNUC_WGET_NORETURN_FUNCPTR __attribute__ ((__noreturn__))
+#else
+# define G_GNUC_WGET_NORETURN_FUNCPTR /* empty */
+#endif
+
+
 #if GCC_VERSION_AT_LEAST(2,5)
 #	define G_GNUC_WGET_CONST __attribute__ ((const))
-#	define G_GNUC_WGET_NORETURN __attribute__ ((noreturn))
 #else
 #	define G_GNUC_WGET_CONST
-#	define G_GNUC_WGET_NORETURN
 #endif
 
 #if GCC_VERSION_AT_LEAST(2,95)
