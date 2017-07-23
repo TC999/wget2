@@ -567,7 +567,12 @@ wget_iri_t *wget_iri_clone(const wget_iri_t *iri)
 	clone->userinfo = iri->userinfo ? (char *)clone + (size_t) (iri->userinfo - (const char *)iri): NULL;
 	clone->password = iri->password ? (char *)clone + (size_t) (iri->password - (const char *)iri): NULL;
 	clone->port = iri->port ? (char *)clone + (size_t) (iri->port - (const char *)iri): NULL;
-	clone->resolv_port = iri->resolv_port ? (char *)clone + (size_t) (iri->resolv_port - (const char *)iri): NULL;
+
+	// Adjust iri->resolv_port only if it is a pointer to memory within the
+	// struct. It may point to a static string as well.
+	if (iri->resolv_port && iri->resolv_port == iri->port) {
+		clone->resolv_port = (char *)clone + (size_t) (iri->resolv_port - (const char *)iri);
+	}
 
 	if (iri->path_allocated)
 		clone->path = wget_strdup(iri->path);
