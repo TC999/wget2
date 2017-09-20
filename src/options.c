@@ -1461,6 +1461,11 @@ static const struct optionw options[] = {
 		{ "Print the server response headers. (default: off)\n"
 		}
 	},
+	{ "skip-files", &config.skip, parse_bool, -1, 0,
+		SECTION_STARTUP,
+		{ "Do not read or load any config file\n"
+		}
+	},
 	{ "span-hosts", &config.span_hosts, parse_bool, -1, 'H',
 		SECTION_DOWNLOAD,
 		{ "Span hosts that were not given on the\n",
@@ -2118,23 +2123,26 @@ int init(int argc, const char **argv)
 	}
 	log_init();
 
-	if (!config.hsts_file)
-		config.hsts_file = wget_aprintf("%s/.wget-hsts", home_dir);
+	if (!config.skip) {
+		if (!config.hsts_file)
+			config.hsts_file = wget_aprintf("%s/.wget-hsts", home_dir);
 
-	if (!config.hpkp_file)
-		config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
+		if (!config.hpkp_file)
+			config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
 
-	if (!config.hpkp_file)
-		config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
+		if (!config.hpkp_file)
+			config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
 
-	if (config.tls_resume && !config.tls_session_file)
-		config.tls_session_file = wget_aprintf("%s/.wget-session", home_dir);
+		if (config.tls_resume && !config.tls_session_file)
+			config.tls_session_file = wget_aprintf("%s/.wget-session", home_dir);
 
-	if (!config.ocsp_file)
-		config.ocsp_file = wget_aprintf("%s/.wget-ocsp", home_dir);
+		if (!config.ocsp_file)
+			config.ocsp_file = wget_aprintf("%s/.wget-ocsp", home_dir);
 
-	if (config.netrc && !config.netrc_file)
-		config.netrc_file = wget_aprintf("%s/.netrc", home_dir);
+		if (config.netrc && !config.netrc_file)
+			config.netrc_file = wget_aprintf("%s/.netrc", home_dir);
+	}
+	//else debug_printf();
 
 	xfree(home_dir);
 
