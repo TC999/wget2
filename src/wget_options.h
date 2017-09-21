@@ -189,7 +189,7 @@ struct config {
 		proxy,
 		xattr,
 		force_progress,
-		skip;
+		skip_config_files;
 };
 
 extern struct config

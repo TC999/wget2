@@ -1461,7 +1461,7 @@ static const struct optionw options[] = {
 		{ "Print the server response headers. (default: off)\n"
 		}
 	},
-	{ "skip-files", &config.skip, parse_bool, -1, 0,
+	{ "skip-files", &config.skip_config_files, parse_bool, -1, 0,
 		SECTION_STARTUP,
 		{ "Do not read or load any config file\n"
 		}
@@ -2123,26 +2123,23 @@ int init(int argc, const char **argv)
 	}
 	log_init();
 
-	if (!config.skip) {
-		if (!config.hsts_file)
-			config.hsts_file = wget_aprintf("%s/.wget-hsts", home_dir);
+	if (!config.hsts_file)
+		config.hsts_file = wget_aprintf("%s/.wget-hsts", home_dir);
 
-		if (!config.hpkp_file)
-			config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
+	if (!config.hpkp_file)
+		config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
 
-		if (!config.hpkp_file)
-			config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
+	if (!config.hpkp_file)
+		config.hpkp_file = wget_aprintf("%s/.wget-hpkp", home_dir);
 
-		if (config.tls_resume && !config.tls_session_file)
-			config.tls_session_file = wget_aprintf("%s/.wget-session", home_dir);
+	if (config.tls_resume && !config.tls_session_file)
+		config.tls_session_file = wget_aprintf("%s/.wget-session", home_dir);
 
-		if (!config.ocsp_file)
-			config.ocsp_file = wget_aprintf("%s/.wget-ocsp", home_dir);
+	if (!config.ocsp_file)
+		config.ocsp_file = wget_aprintf("%s/.wget-ocsp", home_dir);
 
-		if (config.netrc && !config.netrc_file)
-			config.netrc_file = wget_aprintf("%s/.netrc", home_dir);
-	}
-	//else debug_printf();
+	if (config.netrc && !config.netrc_file)
+		config.netrc_file = wget_aprintf("%s/.netrc", home_dir);
 
 	xfree(home_dir);
 
@@ -2184,6 +2181,13 @@ int init(int argc, const char **argv)
 
 		if (fd != -1)
 			close(fd);
+	}
+
+	if (config.skip_config_files) {
+		config.hsts_file = NULL;
+		config.hpkp_file = NULL;
+		config.tls_session_file = NULL;
+		config.ocsp_file = NULL;
 	}
 	log_init();
 
