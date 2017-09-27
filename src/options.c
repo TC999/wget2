@@ -1262,7 +1262,7 @@ static const struct optionw options[] = {
 	},
 	{ "local-db", &config.load_local_db, parse_bool, -1, 0,
 		SECTION_STARTUP,
-		{ "Do not read or load any database\n"
+		{ "Read or load databases\n"
 		}
 	},
 	{ "local-encoding", &config.local_encoding, parse_string, 1, 0,
