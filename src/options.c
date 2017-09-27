@@ -808,7 +808,8 @@ struct config config = {
 #ifdef _WIN32
 	.restrict_file_names = WGET_RESTRICT_NAMES_WINDOWS,
 #endif
-	.xattr = 1
+	.xattr = 1,
+	.load_local_db = 1
 };
 
 static int parse_execute(option_t opt, const char *val, const char invert);
@@ -1257,6 +1258,11 @@ static const struct optionw options[] = {
 	{ "load-cookies", &config.load_cookies, parse_string, 1, 0,
 		SECTION_HTTP,
 		{ "Load cookies from file.\n"
+		}
+	},
+	{ "local-db", &config.load_local_db, parse_bool, -1, 0,
+		SECTION_STARTUP,
+		{ "Do not read or load any database\n"
 		}
 	},
 	{ "local-encoding", &config.local_encoding, parse_string, 1, 0,
@@ -2259,6 +2265,20 @@ int init(int argc, const char **argv)
 
 		if (fd != -1)
 			close(fd);
+	}
+
+	if (!config.load_local_db) {
+		config.hsts_file = NULL;
+		config.hpkp_file = NULL;
+		config.tls_session_file = NULL;
+		config.ocsp_file = NULL;
+		config.cookies = 0;
+		short argPoint = NULL;
+		for (short curPoint = 1; curPoint < argc; curPoint++)
+			if (!strcmp("--no-local-db", argv[curPoint]))
+				argPoint = curPoint;
+
+		parse_command_line(argc-argPoint,&argv[argPoint]);
 	}
 	log_init();
 

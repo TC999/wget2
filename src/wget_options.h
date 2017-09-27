@@ -190,7 +190,8 @@ struct config {
 		xattr,
 		force_progress,
 		stats_site,
-		stats_all;
+		stats_all,
+		load_local_db;
 };
 
 extern struct config
