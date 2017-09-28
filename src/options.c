@@ -730,6 +730,19 @@ static int parse_plugin_option
 	return 0;
 }
 
+static int parse_local_db(option_t opt, const char *val, const char invert)
+{
+	parse_bool(opt, val, invert);
+	if (!config.load_local_db) {
+		config.hsts_file = NULL;
+		config.hpkp_file = NULL;
+		config.tls_session_file = NULL;
+		config.ocsp_file = NULL;
+		config.cookies = 0;
+	}
+	return 0;
+}
+
 static int list_plugins(G_GNUC_WGET_UNUSED option_t opt,
 	G_GNUC_WGET_UNUSED const char *val, G_GNUC_WGET_UNUSED const char invert)
 {
@@ -1260,9 +1273,9 @@ static const struct optionw options[] = {
 		{ "Load cookies from file.\n"
 		}
 	},
-	{ "local-db", &config.load_local_db, parse_bool, -1, 0,
+	{ "local-db", &config.load_local_db, parse_local_db, -1, 0,
 		SECTION_STARTUP,
-		{ "Read or load databases\n"
+		{ "Do not read or load any database\n"
 		}
 	},
 	{ "local-encoding", &config.local_encoding, parse_string, 1, 0,
@@ -2267,19 +2280,6 @@ int init(int argc, const char **argv)
 			close(fd);
 	}
 
-	if (!config.load_local_db) {
-		config.hsts_file = NULL;
-		config.hpkp_file = NULL;
-		config.tls_session_file = NULL;
-		config.ocsp_file = NULL;
-		config.cookies = 0;
-		short argPoint = NULL;
-		for (short curPoint = 1; curPoint < argc; curPoint++)
-			if (!strcmp("--no-local-db", argv[curPoint]))
-				argPoint = curPoint;
-
-		parse_command_line(argc-argPoint,&argv[argPoint]);
-	}
 	log_init();
 
 	// check for correct settings
