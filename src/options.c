@@ -735,9 +735,12 @@ static int parse_local_db(option_t opt, const char *val, const char invert)
 	parse_bool(opt, val, invert);
 	if (!config.load_local_db) {
 		config.hsts_file = NULL;
+		config.hsts = 0;
 		config.hpkp_file = NULL;
+		config.hpkp = 0;
 		config.tls_session_file = NULL;
 		config.ocsp_file = NULL;
+		config.ocsp = 0;
 		config.cookies = 0;
 	}
 	return 0;
@@ -1275,7 +1278,7 @@ static const struct optionw options[] = {
 	},
 	{ "local-db", &config.load_local_db, parse_local_db, -1, 0,
 		SECTION_STARTUP,
-		{ "Read or load databases\n"
+		{ "Do not read or load any database\n"
 		}
 	},
 	{ "local-encoding", &config.local_encoding, parse_string, 1, 0,
