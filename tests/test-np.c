@@ -92,7 +92,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-i
 	wget_test(
@@ -104,7 +104,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

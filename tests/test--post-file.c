@@ -33,14 +33,14 @@
 int main(void)
 {
 	// functions won't come back if an error occurs
-	wget_test_start_server(WGET_TEST_FEATURE_MHD, 0);
+	wget_test_start_server(WGET_TEST_FEATURE_MHD, (int *)0);
 
 	// test-i
 	wget_test(
 		WGET_TEST_OPTIONS, "--post-file=nofile",
 		WGET_TEST_REQUEST_URL, "",
 		WGET_TEST_EXPECTED_ERROR_CODE, 3, // fails with older Wget (<= 1.14)
-		0);
+		(int *)0);
 
 	exit(0);
 }

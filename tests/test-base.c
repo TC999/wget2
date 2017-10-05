@@ -99,7 +99,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-i
 	wget_test(
@@ -116,7 +116,7 @@ int main(void)
 			{ "page+with+spaces.html", urls[6].body },
 			{ "css?query with spaces&param=bla blubb", urls[7].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-O/dev/null
 	wget_test(
@@ -125,7 +125,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test with incomplete base
 	wget_test(
@@ -138,7 +138,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

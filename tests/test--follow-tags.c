@@ -80,7 +80,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// without additional tags
 	wget_test(
@@ -93,7 +93,7 @@ int main(void)
 			{ urls[2].name + 1, urls[2].body },
 			{ urls[3].name + 1, urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --follow-tags single entry
 	wget_test(
@@ -107,7 +107,7 @@ int main(void)
 			{ urls[3].name + 1, urls[3].body },
 			{ urls[4].name + 1, urls[4].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --follow-tags single entry without attribute
 	wget_test(
@@ -122,7 +122,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --follow-tags two entries
 	wget_test(
@@ -137,7 +137,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --follow-tags two entries
 	wget_test(
@@ -152,7 +152,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --ignore-tags single entry
 	wget_test(
@@ -164,7 +164,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --ignore-tags single entry without attribute
 	wget_test(
@@ -176,7 +176,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --ignore-tags two entries
 	wget_test(
@@ -186,7 +186,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --ignore-tags two entries
 	wget_test(
@@ -196,7 +196,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --ignore-tags and --follow-tags combined
 	wget_test(
@@ -209,7 +209,7 @@ int main(void)
 			{ urls[2].name + 1, urls[2].body },
 			{ urls[4].name + 1, urls[4].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

@@ -60,7 +60,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-restrict-ascii
 	wget_test(
@@ -71,7 +71,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-restrict-ascii
 /*
@@ -83,7 +83,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 */
 	exit(0);
 }

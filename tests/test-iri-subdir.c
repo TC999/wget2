@@ -66,7 +66,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-iri-disabled
 	wget_test(
@@ -79,7 +79,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body }, // ~foo/bar.html
 			{ "~foo/‾baz.html", urls[2].body }, // unescaped + UTF-8, matching local-encoding
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

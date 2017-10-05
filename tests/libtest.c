@@ -717,7 +717,7 @@ void wget_test_start_server(int first_key, ...)
 		WGET_DEBUG_FUNC, _write_msg,
 		WGET_ERROR_FUNC, _write_msg,
 		WGET_INFO_FUNC, _write_msg,
-		NULL);
+		(int *)0);
 
 	va_start(args, first_key);
 	for (key = first_key; key; key = va_arg(args, int)) {

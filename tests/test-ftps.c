@@ -79,7 +79,7 @@ int main(void)
 		WGET_TEST_FTP_IO_UNORDERED, &io, countof(io),
 		WGET_TEST_FTPS_IMPLICIT, 1, // use TLS connections right away, no AUTH
 		WGET_TEST_FEATURE_FTP,
-		0);
+		(int *)0);
 
 	char options[128];
 
@@ -97,7 +97,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[1].name, urls[1].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

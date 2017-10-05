@@ -203,7 +203,7 @@ int main(void)
 			WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 			WGET_TEST_FEATURE_MHD,
 			WGET_TEST_FEATURE_PLUGIN,
-			0);
+			(int *)0);
 
 	// Check whether --plugin= works
 	wget_test(
@@ -214,7 +214,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "plugin-loaded.txt", "Plugin loaded\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether --local-plugin= works
 	wget_test(
@@ -225,7 +225,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "plugin-loaded.txt", "Plugin loaded\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether WGET2_PLUGINS works
 	setenv_rpl("WGET2_PLUGIN_DIRS", OBJECT_DIR, 1);
@@ -237,7 +237,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "plugin-loaded.txt", "Plugin loaded\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 	unsetenv_rpl("WGET2_PLUGIN_DIRS");
 	unsetenv_rpl("WGET2_PLUGINS");
 	setenv_rpl("WGET2_PLUGINS", LOCAL_NAME("pluginname") , 1);
@@ -248,7 +248,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "plugin-loaded.txt", "Plugin loaded\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 	unsetenv_rpl("WGET2_PLUGINS");
 
 	// Check that --list-plugins doesn't continue
@@ -258,7 +258,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check behavior for nonexistent plugins
 	wget_test(
@@ -268,7 +268,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("nonexistent"),
 		WGET_TEST_REQUEST_URL, "index.html",
@@ -276,7 +276,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	setenv_rpl("WGET2_PLUGINS", LOCAL_NAME("nonexistent") , 1);
 	wget_test(
 		WGET_TEST_REQUEST_URL, "index.html",
@@ -284,7 +284,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	unsetenv_rpl("WGET2_PLUGINS");
 
 	// Check behavior for nonexistent search directories
@@ -296,14 +296,14 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "plugin-loaded.txt", "Plugin loaded\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--plugin-dirs=" OBJECT_DIR "/nonexistent," OBJECT_DIR " --list-plugins",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check behavior for plugins that fail
 	wget_test(
@@ -313,7 +313,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginfaulty2"),
 		WGET_TEST_REQUEST_URL, "index.html",
@@ -321,7 +321,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether wget_plugin_register_finalizer works properly
 	wget_test(
@@ -332,7 +332,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "exit-status.txt", "exit(0)\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginexit"),
 		WGET_TEST_REQUEST_URL, "nonexistent.html",
@@ -340,7 +340,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "exit-status.txt", "exit(8)\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check if option forwarding works for options with no value
 	wget_test(
@@ -351,7 +351,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "options.txt", "y\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption.y "
 			"--plugin-opt=pluginoption.beta",
@@ -361,7 +361,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "options.txt", "y\nbeta\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check if option forwarding works with options with values
 	wget_test(
@@ -373,7 +373,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "options.txt", "z=\nz=value1\ngamma=value2\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check behavior for incorrect format
 	wget_test(
@@ -382,42 +382,42 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption.=value",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption.",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=.",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check behavior for incorrect plugin name
 	wget_test(
@@ -427,7 +427,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginname") " --plugin-opt=pluginname.option=value",
 		WGET_TEST_REQUEST_URL, "index.html",
@@ -435,7 +435,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "plugin-loaded.txt", "Plugin loaded\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check behavior for incorrect option name/value combination
 	wget_test(
@@ -444,21 +444,21 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption.y=value",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption.z",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check for correct functioning of --help option
 	wget_test(
@@ -467,21 +467,21 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption.help",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginoption") " --plugin-opt=pluginoption.help=arg",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 1,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether URL interception works
 	wget_test(
@@ -493,7 +493,7 @@ int main(void)
 			{ "index.html", urls[0].body },
 			{ "thirdpage.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi") " --recursive --no-host-directories"
 			" --reject=*thirdpage.html --plugin-opt=pluginapi.accept=thirdpage",
@@ -504,7 +504,7 @@ int main(void)
 			{ "secondpage.html", urls[1].body },
 			{ "thirdpage.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi") " --recursive --no-host-directories"
 			" --plugin-opt=pluginapi.replace=third:forth",
@@ -515,7 +515,7 @@ int main(void)
 			{ "secondpage.html", urls[1].body },
 			{ "forthpage.html", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi") " --recursive --no-host-directories"
 			" --plugin-opt=pluginapi.saveas=third:alt.html",
@@ -526,51 +526,51 @@ int main(void)
 			{ "secondpage.html", urls[1].body },
 			{ "alt.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi")
 			" --plugin-opt=pluginapi.reject=secondpage",
-		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", NULL,
+		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{ "thirdpage.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi")
 			" --reject=*thirdpage.html --plugin-opt=pluginapi.accept=thirdpage",
-		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", NULL,
+		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{ "secondpage.html", urls[1].body },
 			{ "thirdpage.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi")
 			" --plugin-opt=pluginapi.replace=third:forth",
-		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", NULL,
+		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{ "secondpage.html", urls[1].body },
 			{ "forthpage.html", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi")
 			" --plugin-opt=pluginapi.saveas=third:alt.html",
-		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", NULL,
+		WGET_TEST_REQUEST_URLS, "index.html", "secondpage.html", "thirdpage.html", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{ "secondpage.html", urls[1].body },
 			{ "alt.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether intercepting downloaded files works
 	wget_test(
@@ -584,7 +584,7 @@ int main(void)
 			{ "thirdpage.html", urls[2].body },
 			{ "files_processed.txt", "rot13_index.html\nsecondpage.html\nthirdpage.html\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether overriding default wget2's post processing works
 	wget_test(
@@ -599,7 +599,7 @@ int main(void)
 			{ "thirdpage.html", urls[2].body },
 			{ "files_processed.txt", "rot13_index_mixed.html\nsecondpage.html\nthirdpage.html\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether intercepting downloaded files works with existing partial files
 	wget_test(
@@ -614,7 +614,7 @@ int main(void)
 			{	"data.txt", data },
 			{ "files_processed.txt", "data.txt\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether intercepting downloaded files works with existing files
 	wget_test(
@@ -629,7 +629,7 @@ int main(void)
 			{	"data.txt", data },
 			{ "files_processed.txt", "data.txt\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether intercepting downloaded files works with --spider
 	wget_test(
@@ -640,7 +640,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "files_processed.txt", "rot13_index.html\nsecondpage.html\nthirdpage.html\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether intercepting downloaded files works with --output-document=
 	wget_test(
@@ -655,7 +655,7 @@ int main(void)
 			{	"data2.txt", data },
 			{ "files_processed.txt", "data.txt\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// Check whether intercepting downloaded files works with large files
 #ifdef LARGEFILE
@@ -671,7 +671,7 @@ int main(void)
 			{	"large.txt", largedata },
 			{ "files_processed.txt", "large.txt\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "--local-plugin=" LOCAL_NAME("pluginapi") " -c"
@@ -685,7 +685,7 @@ int main(void)
 			{	"large.txt", largedata },
 			{ "files_processed.txt", "large.txt\n" },
 			{	NULL } },
-		0);
+		(int *)0);
 #endif
 
 	// Check whether priority based database selection works correctly
@@ -696,7 +696,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

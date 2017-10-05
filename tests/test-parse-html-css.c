@@ -71,7 +71,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test--parse-html-css
 	wget_test(
@@ -84,7 +84,7 @@ int main(void)
 			{ urls[2].name + 1, urls[2].body },
 			{ urls[3].name + 1, urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	char options[128];
 	snprintf(options, sizeof(options),
@@ -95,7 +95,7 @@ int main(void)
 	// test--parse-html-css from file
 	wget_test(
 		WGET_TEST_OPTIONS, options,
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{	urls[0].name + 1, urls[0].body },
@@ -106,7 +106,7 @@ int main(void)
 			{ urls[2].name + 1, urls[2].body },
 			{ urls[3].name + 1, urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

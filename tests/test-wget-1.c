@@ -154,7 +154,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// some tests are not working on file systems that mangle filenames to lower- or uppercase
 	int fs_flags = wget_test_check_file_system();
@@ -166,14 +166,14 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-nonexistent-quiet
 	wget_test(
 		WGET_TEST_OPTIONS, "--quiet",
 		WGET_TEST_REQUEST_URL, "nonexistent",
 		WGET_TEST_EXPECTED_ERROR_CODE, 8,
-		0);
+		(int *)0);
 
 	// test-stdouterr
 #ifdef __linux__
@@ -183,7 +183,7 @@ int main(void)
 			WGET_TEST_OPTIONS, "-c -O /dev/full",
 			WGET_TEST_REQUEST_URL, "dummy.txt",
 			WGET_TEST_EXPECTED_ERROR_CODE, 3,
-			0);
+			(int *)0);
 	}
 #endif
 
@@ -192,21 +192,21 @@ int main(void)
 		WGET_TEST_OPTIONS, "--spider",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
-		0);
+		(int *)0);
 
 	// test--spider-fail
 	wget_test(
 		WGET_TEST_OPTIONS, "--spider",
 		WGET_TEST_REQUEST_URL, "nonexistent",
 		WGET_TEST_EXPECTED_ERROR_CODE, 8,
-		0);
+		(int *)0);
 
 	// test--spider-r--no-content-disposition-trivial
 	wget_test(
 		WGET_TEST_OPTIONS, "--spider -r --no-content-disposition",
 		WGET_TEST_REQUEST_URL, "",
 		WGET_TEST_EXPECTED_ERROR_CODE, 8,
-		0);
+		(int *)0);
 
 	// test--no-content-disposition-trivial
 	wget_test(
@@ -216,7 +216,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	urls[1].headers[1] = "Content-Disposition: attachment; filename=\"filename.html\"";
 
@@ -228,14 +228,14 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test--spider-r--no-content-disposition
 	wget_test(
 		WGET_TEST_OPTIONS, "--spider -r --no-content-disposition",
 		WGET_TEST_REQUEST_URL, "",
 		WGET_TEST_EXPECTED_ERROR_CODE, 8,
-		0);
+		(int *)0);
 
 	urls[1].headers[1] = NULL;
 
@@ -247,7 +247,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"filename.html", dummypage },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test--HTTP-content-disposition-1
 	wget_test(
@@ -263,7 +263,7 @@ int main(void)
 			{	"filename.html.1", "dontcare" },
 			{	"filename.html.2", dummypage },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test--HTTP-content-disposition-2
 	wget_test(
@@ -279,7 +279,7 @@ int main(void)
 			{	"filename.html.1", "dontcare" },
 			{	"dummy.html", dummypage },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test--HTTP-content-disposition-RFC6266
 #define ccedilla_u8 "\xC3\xA7"
@@ -296,7 +296,7 @@ int main(void)
 			{	"filename.html.1", "dontcare" },
 			{	"file_fran" ccedilla_u8 "ais.html", dummypage },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	urls[3].headers[1] = "Last-Modified: Sat, 09 Oct 2004 08:30:00 GMT";
 
@@ -308,7 +308,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body, 1097310600 },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	urls[3].headers[2] = "Content-Disposition: attachment; filename=\"filename.txt\"";
 
@@ -320,7 +320,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body, 1097310600 },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-N-HTTP--content-disposition
 	wget_test(
@@ -330,7 +330,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"filename.txt", urls[3].body, 1097310600 },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	urls[3].headers[2] = NULL;
 
@@ -354,7 +354,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"dummy.txt", modified, 1097310600 },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		// test-N-old
 		wget_test(
@@ -367,7 +367,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"dummy.txt", urls[3].body, 1097310600 },
 				{	NULL } },
-			0);
+			(int *)0);
 
 /*
 		// test-N-smaller
@@ -385,7 +385,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"dummy.txt", modified, 1097310600 },
 				{	NULL } },
-			0);
+			(int *)0);
 		urls[3].body = old_body; // restore body
 */
 	}
@@ -398,7 +398,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body, 0},
 			{	NULL } },
-		0);
+		(int *)0);
 
 	urls[3].headers[1] = NULL;
 
@@ -415,7 +415,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body, 0},
 			{	NULL } },
-		0);
+		(int *)0);
 */
 
 	urls[1].headers[1] = "Content-Disposition: attachment; filename=\"filename.html\"";
@@ -428,7 +428,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"out", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-O-HTTP-content-disposition
 	wget_test(
@@ -438,7 +438,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"out", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 
 	urls[3].headers[1] = NULL;
@@ -451,7 +451,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"out", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-O-nonexisting
 	wget_test(
@@ -461,7 +461,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			// {	"out", "" }, // Wget would create an empty file here, but Wget not
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-O
 	wget_test(
@@ -471,7 +471,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"out", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	if ((fs_flags & WGET_TEST_FS_CASEMATTERS) == 0) {
 		urls[3].name="/DuMmy.Txt";
@@ -484,7 +484,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"dummy.txt", urls[3].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		// test-restrict-uppercase
 		wget_test(
@@ -494,7 +494,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"DUMMY.TXT", urls[3].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		urls[3].name="/dummy.txt";
 	}
@@ -510,7 +510,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	{
 		// server sends same length content with slightly different content
@@ -528,7 +528,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"dummy.txt", urls[3].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		wget_test(
 			WGET_TEST_OPTIONS, "--header Range:bytes=9-",
@@ -540,7 +540,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"dummy.txt", urls[3].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		wget_xfree(partial);
 	}
@@ -566,7 +566,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{	"dummy.txt", urls[3].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		urls[3].body = old_body;
 		wget_xfree(partial);
@@ -581,7 +581,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-O--continue-existing
 	wget_test(
@@ -595,7 +595,7 @@ int main(void)
 			{ urls[0].name + 1, urls[0].body },
 			{ "newindex.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test --chunk-size, new file
 	wget_test(
@@ -606,7 +606,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test --chunk-size, new file, without Content-Length header
 	wget_test(
@@ -618,7 +618,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test --chunk-size, new file, with chunk size > Content-Length
 	wget_test(
@@ -629,7 +629,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test -c --chunk-size, new file
 	wget_test(
@@ -640,7 +640,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test -c --chunk-size, existing file
 	wget_test(
@@ -653,7 +653,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"dummy.txt", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test--https-only
 	wget_test(
@@ -663,7 +663,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	"index.html", urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test --content-on-error
 	wget_test(
@@ -673,7 +673,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test not saving file on error
 	wget_test(
@@ -682,7 +682,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 8,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

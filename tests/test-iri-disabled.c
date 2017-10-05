@@ -126,7 +126,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-iri-disabled
 	wget_test(
@@ -141,7 +141,7 @@ int main(void)
 			{ "p2_" eacute_u8 eacute_u8 "n.html", urls[4].body },
 			{ "p3_" eurosign_u8 eurosign_u8 eurosign_u8 ".html", urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

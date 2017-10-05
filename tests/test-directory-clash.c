@@ -79,7 +79,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH",
@@ -90,7 +90,7 @@ int main(void)
 			{ urls[3].name + 1, urls[3].body },
 			{ "subdir.1", urls[2].body, 0 }, // filename / directory clash appends .x to the file
 			{	NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH",
@@ -101,7 +101,7 @@ int main(void)
 			{ urls[3].name + 1, urls[3].body },
 			{ "subdir.1", urls[2].body, 0 }, // filename / directory clash appends .x to the file
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

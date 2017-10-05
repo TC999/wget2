@@ -61,7 +61,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-E-k
 	wget_test(
@@ -72,7 +72,7 @@ int main(void)
 			{ "index.php.html", mainpagemangled },
 			{ "subpage.php.html", urls[1].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-E-k-K
 	wget_test(
@@ -84,7 +84,7 @@ int main(void)
 			{ "index.php.orig", urls[0].body },
 			{ "subpage.php.html", urls[1].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

@@ -59,19 +59,19 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test negative chunk size (32bit system only)
 	wget_test(
 		WGET_TEST_OPTIONS, "",
-		WGET_TEST_REQUEST_URLS, "1.bad.txt", "2.bad.txt", "3.bad.txt", NULL,
+		WGET_TEST_REQUEST_URLS, "1.bad.txt", "2.bad.txt", "3.bad.txt", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, NULL }, // do not check content
 			{ urls[1].name + 1, NULL }, // do not check content
 			{ urls[2].name + 1, NULL }, // do not check content
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

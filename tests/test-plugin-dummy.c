@@ -428,7 +428,7 @@ static int post_processor(wget_plugin_t *plugin, wget_downloaded_file_t *file)
 			char *refdata;
 			size_t refsize;
 			test_assert((refdata = wget_read_file(fname, &refsize)));
-			test_assert(refsize == size && "wget_read_file(fname, &refsize)");
+			test_assert(refsize == size);
 			test_assert(memcmp(data, refdata, size) == 0);
 			wget_free(refdata);
 		}
@@ -439,7 +439,7 @@ static int post_processor(wget_plugin_t *plugin, wget_downloaded_file_t *file)
 			size_t i;
 			for (i = 0; i < size; i++)
 				test_assert((int) data[i] == getc(stream));
-			test_assert("At end of stream, wget_downloaded_file_open_stream(file)" && getc(stream) == EOF);
+			test_assert(getc(stream) == EOF);
 			fclose(stream);
 		}
 

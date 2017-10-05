@@ -56,7 +56,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-auth-digest
 	wget_test(
@@ -67,7 +67,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-auth-digest with .netrc
 	wget_test(
@@ -82,7 +82,7 @@ int main(void)
 			{ urls[0].name + 1, urls[0].body },
 			{ netrc.name, netrc.content },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	// wrong credentials
 	wget_test(
@@ -92,7 +92,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -101,7 +101,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -110,7 +110,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -119,7 +119,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -128,7 +128,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -137,7 +137,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -145,7 +145,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -154,7 +154,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
@@ -163,7 +163,7 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE, 6,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

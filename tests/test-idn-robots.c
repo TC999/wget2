@@ -70,7 +70,7 @@ int main(void)
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
 		WGET_TEST_FEATURE_IDN,
-		0);
+		(int *)0);
 
 	// test-idn-robots
 	snprintf(options, sizeof(options),
@@ -80,14 +80,14 @@ int main(void)
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, options,
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ punycoded_hostname "/index.html", urls[0].body },
 			{ punycoded_hostname "/foo.txt", urls[1].body },
 			{ punycoded_hostname "/robots.txt", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 // UTF-8 command line characters are mangled on MinGW on C locale
 #ifndef _WIN32
@@ -102,14 +102,14 @@ int main(void)
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, options,
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ punycoded_hostname "/index.html", urls[0].body },
 			{ punycoded_hostname "/foo.txt", urls[1].body },
 			{ punycoded_hostname "/robots.txt", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 #endif
 
 	exit(0);

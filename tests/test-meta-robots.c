@@ -114,12 +114,12 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-meta-robots
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -e robots=on -nd",
-		WGET_TEST_REQUEST_URLS, "start.html", "mid.html", "end.html", "solo.html", "follow1.html", "follow2.html", NULL,
+		WGET_TEST_REQUEST_URLS, "start.html", "mid.html", "end.html", "solo.html", "follow1.html", "follow2.html", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
@@ -131,7 +131,7 @@ int main(void)
 			{ urls[7].name + 1, urls[7].body },
 			{ urls[8].name + 1, urls[8].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

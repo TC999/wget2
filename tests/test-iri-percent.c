@@ -74,7 +74,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-iri-disabled
 	wget_test(
@@ -86,7 +86,7 @@ int main(void)
 			{ urls[0].name + 1, urls[0].body },
 			{ "hello_" ccedilla_u8 eacute_u8 ".html", urls[1].body, 0, WGET_RESTRICT_NAMES_NOCONTROL },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

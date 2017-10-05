@@ -87,13 +87,13 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-iri-disabled
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, "--local-encoding=UTF-8 --input-encoding=ISO-8859-1 --iri --trust-server-names -i urls.txt",
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{       "urls.txt", urls[4].body },
@@ -104,7 +104,7 @@ int main(void)
 			{ "p2_" eacute_u8 eacute_u8 "n.html", urls[3].body },
 			{ "urls.txt", urls[4].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

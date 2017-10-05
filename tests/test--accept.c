@@ -89,7 +89,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// --accept using just suffixes
 	wget_test(
@@ -101,7 +101,7 @@ int main(void)
 			{ urls[3].name + 1, urls[3].body },
 			{ urls[4].name + 1, urls[4].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --reject using just suffixes
 	wget_test(
@@ -114,7 +114,7 @@ int main(void)
 			{ urls[5].name + 1, urls[5].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --accept using just suffixes and ignore case
 	wget_test(
@@ -127,7 +127,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --reject using just suffixes and ignore case
 	wget_test(
@@ -139,7 +139,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --accept using wildcards
 	wget_test(
@@ -151,7 +151,7 @@ int main(void)
 			{ urls[3].name + 1, urls[3].body },
 			{ urls[4].name + 1, urls[4].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --reject using wildcards
 	wget_test(
@@ -164,7 +164,7 @@ int main(void)
 			{ urls[5].name + 1, urls[5].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --accept using wildcards and ignore case
 	wget_test(
@@ -177,7 +177,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --reject using wildcards and ignore case
 	wget_test(
@@ -189,7 +189,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --accept using wildcards
 	wget_test(
@@ -203,7 +203,7 @@ int main(void)
 			{ urls[5].name + 1, urls[5].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --reject using wildcards
 	wget_test(
@@ -214,7 +214,7 @@ int main(void)
 			{ urls[0].name + 1, urls[0].body },
 			{ urls[1].name + 1, urls[1].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --accept using wildcards
 	wget_test(
@@ -227,7 +227,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --reject using wildcards
 	wget_test(
@@ -239,7 +239,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --accept using wildcards
 	wget_test(
@@ -251,7 +251,7 @@ int main(void)
 			{ urls[3].name + 1, urls[3].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// --reject using wildcards
 	wget_test(
@@ -264,7 +264,7 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

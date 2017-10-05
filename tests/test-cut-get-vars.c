@@ -67,7 +67,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test--cut-url-get-vars
 	wget_test(
@@ -78,7 +78,7 @@ int main(void)
 			{ urls[0].name + 1, urls[0].body },
 			{ urls[1].name + 1, urls[1].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test--cut-file-get-vars
 	wget_test(
@@ -90,7 +90,7 @@ int main(void)
 			{ "page2.html", urls[2].body },
 			{ "page2.html.1", urls[3].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

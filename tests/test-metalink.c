@@ -199,7 +199,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// --no-metalink
 	wget_test(
@@ -209,7 +209,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	// metalink V3, no pieces
 	wget_test(
@@ -218,7 +218,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[1].name + 1, urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	// metalink V3, no pieces, as input file
 	wget_test(
@@ -231,7 +231,7 @@ int main(void)
 			{ "archive.meta", urls[0].body },
 			{ urls[1].name + 1, urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	// metalink V4, no pieces
 	wget_test(
@@ -240,7 +240,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[3].name + 1, urls[3].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	// metalink V4, two pieces
 	wget_test(
@@ -249,7 +249,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[5].name + 1, urls[5].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	// metalink V4, two pieces, as input file
 	wget_test(
@@ -262,7 +262,7 @@ int main(void)
 			{ "archiveP.meta4", urls[4].body },
 			{ urls[5].name + 1, urls[5].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	char *digest_str = NULL;
 	/**** RFC 6249 Metalink/HTTP: Mirrors and Hashes  - with metalink description ****/
@@ -277,7 +277,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[6].name + 1, urls[8].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	free(digest_str);
 
@@ -293,7 +293,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[9].name + 1, urls[10].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	free(digest_str);
 

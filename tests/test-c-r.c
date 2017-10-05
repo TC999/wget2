@@ -97,7 +97,7 @@ int main(void)
 	wget_test_start_server(
 			WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 			WGET_TEST_FEATURE_MHD,
-			0);
+			(int *)0);
 
 	// test-c-r with no existing files
 	wget_test(
@@ -109,7 +109,7 @@ int main(void)
 			{ "secondpage.html", urls[1].body },
 			{ "thirdpage.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-c-r with existing file
 	wget_test(
@@ -124,7 +124,7 @@ int main(void)
 			{ "secondpage.html", urls[1].body },
 			{ "thirdpage.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-c-r with existing partial file
 	wget_test(
@@ -139,7 +139,7 @@ int main(void)
 			{ "secondpage.html", urls[1].body },
 			{ "thirdpage.html", urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

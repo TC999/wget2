@@ -183,7 +183,7 @@ int main(int argc, const char * const *argv)
 		WGET_DEBUG_STREAM, stdout,
 		WGET_ERROR_STREAM, stdout,
 		WGET_INFO_STREAM, stdout,
-		NULL);
+		(int *)0);
 
 	test_cookies();
 

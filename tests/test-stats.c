@@ -80,7 +80,7 @@ int main(void)
 	// functions won't come back if an error occurs
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
-		0);
+		(int *)0);
 
 	static const char *stats_options[] = {
 		"--stats-dns",
@@ -109,7 +109,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{ urls[0].name + 1, urls[0].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		// test stats option without format
 		snprintf(options, sizeof(options), "%s=-", stats_options[it]);
@@ -121,7 +121,7 @@ int main(void)
 			WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 				{ urls[0].name + 1, urls[0].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		for (unsigned it2 = 0; it2 < countof(stats_format); it2++) {
 			// test stats option with format
@@ -134,7 +134,7 @@ int main(void)
 				WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 					{ urls[0].name + 1, urls[0].body },
 					{	NULL } },
-				0);
+				(int *)0);
 		}
 
 		for (unsigned it2 = 0; it2 < countof(stats_format); it2++) {
@@ -152,7 +152,7 @@ int main(void)
 					{ urls[0].name + 1, urls[0].body },
 					{ "stats" },
 					{	NULL } },
-				0);
+				(int *)0);
 		}
 
 		// test stats option without additional params With -r
@@ -167,7 +167,7 @@ int main(void)
 				{ "secondpage.html", urls[1].body },
 				{ "thirdpage.html", urls[2].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		// test stats option without format With -r
 		snprintf(options, sizeof(options), "%s=- -r -nH", stats_options[it]);
@@ -181,7 +181,7 @@ int main(void)
 				{ "secondpage.html", urls[1].body },
 				{ "thirdpage.html", urls[2].body },
 				{	NULL } },
-			0);
+			(int *)0);
 
 		for (unsigned it2 = 0; it2 < countof(stats_format); it2++) {
 			// test stats option with format With -r
@@ -196,7 +196,7 @@ int main(void)
 					{ "secondpage.html", urls[1].body },
 					{ "thirdpage.html", urls[2].body },
 					{	NULL } },
-				0);
+				(int *)0);
 		}
 
 		for (unsigned it2 = 0; it2 < countof(stats_format); it2++) {
@@ -216,7 +216,7 @@ int main(void)
 					{ "thirdpage.html", urls[2].body },
 					{ "stats" },
 					{	NULL } },
-				0);
+				(int *)0);
 		}
 	}
 
@@ -235,7 +235,7 @@ int main(void)
 			{ "3-stats" },
 			{ "4-stats" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test stats-all option with csv format with -r
 	snprintf(options, sizeof(options), "%s=%s:stats -r -nH", "--stats-all", "csv");
@@ -254,7 +254,7 @@ int main(void)
 			{ "3-stats" },
 			{ "4-stats" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test stats-site option with tree format with -r
 	snprintf(options, sizeof(options), "%s=%s:stats -r -nH", "--stats-site", "tree");
@@ -269,7 +269,7 @@ int main(void)
 			{ "thirdpage.html", urls[2].body },
 			{ "stats" },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

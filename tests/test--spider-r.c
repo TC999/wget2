@@ -80,7 +80,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test--spider-r-HTTP-Content-Disposition
 	wget_test(
@@ -88,7 +88,7 @@ int main(void)
 		WGET_TEST_OPTIONS, "--spider -r",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 8,
-		0);
+		(int *)0);
 
 	// test--spider-r
 	urls[1].headers[1] = NULL;
@@ -97,7 +97,7 @@ int main(void)
 		WGET_TEST_OPTIONS, "--spider -r",
 		WGET_TEST_REQUEST_URL, "index.html",
 		WGET_TEST_EXPECTED_ERROR_CODE, 8,
-		0);
+		(int *)0);
 
 	exit(0);
 }

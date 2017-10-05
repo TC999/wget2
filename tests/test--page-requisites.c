@@ -149,7 +149,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test--page-requisites
 	wget_test(
@@ -169,7 +169,7 @@ int main(void)
 			{ urls[10].name + 1, urls[10].body }, // myfavicon.ico
 			{ urls[12].name + 1, urls[12].body }, // preload.css
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

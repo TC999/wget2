@@ -89,7 +89,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// robots.txt forbids /subdir2/ for '*'
 	wget_test(
@@ -103,12 +103,12 @@ int main(void)
 			{ urls[3].name + 1, urls[3].body },
 			{ urls[4].name + 1, urls[4].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// robots.txt forbids /subdir2/ for '*', but we download user-requested page
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH",
-		WGET_TEST_REQUEST_URLS, "index.html", "subdir2/subpage2.html", NULL,
+		WGET_TEST_REQUEST_URLS, "index.html", "subdir2/subpage2.html", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
@@ -118,6 +118,6 @@ int main(void)
 			{ urls[4].name + 1, urls[4].body },
 			{ urls[6].name + 1, urls[6].body },
 			{	NULL } },
-		0);
+		(int *)0);
 	exit(0);
 }

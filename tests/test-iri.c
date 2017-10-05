@@ -135,7 +135,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-iri
 	snprintf(request_header, sizeof(request_header),
@@ -156,7 +156,7 @@ int main(void)
 			{ "p3_" eurosign_u8 eurosign_u8 eurosign_u8 ".html", urls[5].body, 0, WGET_RESTRICT_NAMES_NOCONTROL },
 			{ "p4_m" eacute_u8 eacute_u8 "r.html", urls[7].body, 0, WGET_RESTRICT_NAMES_NOCONTROL },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

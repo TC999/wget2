@@ -54,7 +54,7 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH --cut-dirs=1",
@@ -64,7 +64,7 @@ int main(void)
 			{ urls[0].name + 1, urls[0].body },
 			{ "page2.html", urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH --cut-dirs=0",
@@ -73,7 +73,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[1].name + 1, urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r --cut-dirs=1",
@@ -83,7 +83,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "localhost/page2.html", urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH --cut-dirs=1",
@@ -92,7 +92,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "page2.html", urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH --cut-dirs=2",
@@ -101,7 +101,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "page2.html", urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r --cut-dirs=2",
@@ -111,7 +111,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ "localhost/page2.html", urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	wget_test(
 		WGET_TEST_OPTIONS, "-r -nH --cut-dirs=-1",
@@ -120,7 +120,7 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[1].name + 1, urls[1].body },
 			{ NULL } },
-		0);
+		(int *)0);
 
 	exit(0);
 }

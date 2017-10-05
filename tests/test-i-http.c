@@ -60,13 +60,13 @@ int main(void)
 	wget_test_start_server(
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
-		0);
+		(int *)0);
 
 	// test-i
 	wget_test(
 //		WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, "-i urls.txt",
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{	"urls.txt", urls[0].body },
@@ -76,7 +76,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 /*
 	// test-i-http (expands to -i http://localhost:{{port}}/urls.txt)
 	wget_test(
@@ -88,7 +88,7 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 */
 	exit(0);
 }

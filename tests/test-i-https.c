@@ -61,13 +61,13 @@ int main(void)
 		WGET_TEST_RESPONSE_URLS, &urls, countof(urls),
 		WGET_TEST_FEATURE_MHD,
 		WGET_TEST_FEATURE_TLS,
-		0);
+		(int *)0);
 
 	// test-i-https with loading CA Certificate
 	wget_test(
 		// WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, "--ca-certificate=" SRCDIR "/certs/x509-ca-cert.pem --no-ocsp -i urls.txt",
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{	"urls.txt", urls[0].body },
@@ -77,13 +77,13 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-i-https with loading CA Certificate and CRL
 	wget_test(
 		// WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, "--ca-certificate=" SRCDIR "/certs/x509-ca-cert.pem --crl-file=" SRCDIR "/certs/x509-server-crl.pem --no-ocsp -i urls.txt",
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 5,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{	"urls.txt", urls[0].body },
@@ -91,13 +91,13 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-i-https ignoring unknown certificate
 	wget_test(
 		// WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, "--no-check-certificate -i urls.txt",
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{	"urls.txt", urls[0].body },
@@ -107,13 +107,13 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-i-https ignoring unknown certificate (with CRL)
 	wget_test(
 		// WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, "--no-check-certificate --crl-file=" SRCDIR "/certs/x509-server-crl.pem -i urls.txt",
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{	"urls.txt", urls[0].body },
@@ -123,13 +123,13 @@ int main(void)
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 	// test-i-https failing due to unknown certificate
 	wget_test(
 		// WGET_TEST_KEEP_TMPFILES, 1,
 		WGET_TEST_OPTIONS, "--tries=1 -i urls.txt",
-		WGET_TEST_REQUEST_URL, NULL,
+		WGET_TEST_REQUEST_URL, (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 5,
 		WGET_TEST_EXISTING_FILES, &(wget_test_file_t []) {
 			{	"urls.txt", urls[0].body },
@@ -137,20 +137,20 @@ int main(void)
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{	NULL } },
-		0);
+		(int *)0);
 
 /*
 	// test-i-http (expands to -i https://localhost:{{sslport}}/urls.txt)
 	wget_test(
 		WGET_TEST_OPTIONS, "-i",
-		WGET_TEST_REQUEST_URL, "urls.txt",
+		WGET_TEST_REQUEST_URL, "urls.txt", (char *)0,
 		WGET_TEST_EXPECTED_ERROR_CODE, 0,
 		WGET_TEST_EXPECTED_FILES, &(wget_test_file_t []) {
 			{ urls[0].name + 1, urls[0].body },
 			{ urls[1].name + 1, urls[1].body },
 			{ urls[2].name + 1, urls[2].body },
 			{	NULL } },
-		0);
+		(int *)0);
 */
 	exit(0);
 }
