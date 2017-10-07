@@ -20,8 +20,6 @@
  * Header file for xattr routines
  */
 
-#include <stdio.h>
-
 #ifndef _WGET_XATTR_H
 #define _WGET_XATTR_H
 
