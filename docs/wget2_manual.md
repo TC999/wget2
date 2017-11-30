@@ -722,6 +722,11 @@ Go to background immediately after startup. If no output file is specified via t
 
   When "--trust-server-names" is used, the redirection URL is affected by this setting.
 
+* `--chunk-size=size`
+
+  Download large files in multithreaded chunks. This switch specifies the size of the chunks, given in bytes if no other
+  byte multiple unit is specified. By default it's set on 0/off.
+
 ### <a name="Directory Options"/>Directory Options
 
 * `-nd`, `--no-directories`
@@ -924,6 +929,11 @@ Go to background immediately after startup. If no output file is specified via t
   Specifies the maximum number of redirections to follow for a resource.  The default is 20, which is usually far
   more than necessary. However, on those occasions where you want to allow more (or fewer), this is the option to
   use.
+
+* `--max-threads=number`
+
+  Specifies the maximum number of concurrent download threads for a resource. The default is 5 but if you want to
+  allow more or fewer this is the option to use.
 
 * `--proxy-user=user`, `--proxy-password=password`
 
