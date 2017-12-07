@@ -1,6 +1,6 @@
 /*
  * Copyright(c) 2012 Tim Ruehsen
- * Copyright(c) 2015-2016 Free Software Foundation, Inc.
+ * Copyright(c) 2015-2017 Free Software Foundation, Inc.
  *
  * This file is part of Wget.
  *
@@ -904,7 +904,8 @@ struct config config = {
 #endif
 	.xattr = 1,
 	.local_db = 1,
-	.report_speed = WGET_REPORT_SPEED_BYTES
+	.report_speed = WGET_REPORT_SPEED_BYTES,
+	.spider_output_fd = -1
 };
 
 static int parse_execute(option_t opt, const char *val, const char invert);
@@ -1657,6 +1658,13 @@ static const struct optionw options[] = {
 	{ "spider", &config.spider, parse_bool, -1, 0,
 		SECTION_DOWNLOAD,
 		{ "Enable web spider mode. (default: off)\n"
+		}
+	},
+	{ "spider-output", &config.spider_output, parse_string, 1, 0,
+		SECTION_STARTUP,
+		{ "Output all the URLs accessed by the spider\n",
+		  "into a specified file. (default: empty file)\n",
+		  "--spider MUST be set to 'on'.\n"
 		}
 	},
 	{ "stats-all", &config.stats_all, parse_stats_all, -1, 0,
@@ -2597,6 +2605,9 @@ int init(int argc, const char **argv)
 			close(fd);
 	}
 
+	if (config.spider && config.spider_output && strcmp(config.spider_output,"-") && !config.dont_write)
+		config.spider_output_fd = open(config.spider_output, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
 	if (!config.local_encoding)
 		config.local_encoding = wget_local_charset_encoding();
 	if (!config.input_encoding)
@@ -2845,6 +2856,7 @@ void deinit(void)
 	xfree(config.referer);
 	xfree(config.remote_encoding);
 	xfree(config.save_cookies);
+	xfree(config.spider_output);
 	xfree(config.secure_protocol);
 	xfree(config.tls_session_file);
 	xfree(config.user_agent);

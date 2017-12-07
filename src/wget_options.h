@@ -72,7 +72,8 @@ struct config {
 		*random_file,
 		*secure_protocol, // auto, SSLv2, SSLv3, TLSv1
 		*accept_regex,
-		*reject_regex;
+		*reject_regex,
+		*spider_output;
 	wget_vector_t
 		*config_files,
 		*domains,
@@ -125,7 +126,8 @@ struct config {
 		dns_timeout, // ms
 		read_timeout, // ms
 		max_redirect,
-		max_threads;
+		max_threads,
+		spider_output_fd;
 	char
 		tls_resume,            // if TLS session resumption is enabled or not
 		tls_false_start,
