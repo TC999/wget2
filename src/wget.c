@@ -1908,7 +1908,7 @@ void *downloader_thread(void *p)
 				}
 				break;
 			}
-//printf("\x1b[34murl: %s\n\x1b[0m", job->iri->uri);
+
 			if (config.spider && config.spider_output)
 				write_spider_output(job->iri->uri);
 
