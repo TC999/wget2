@@ -72,7 +72,8 @@ struct config {
 		*random_file,
 		*secure_protocol, // auto, SSLv2, SSLv3, TLSv1
 		*accept_regex,
-		*reject_regex;
+		*reject_regex,
+		*spider_output;
 	wget_vector_t
 		*config_files,
 		*domains,

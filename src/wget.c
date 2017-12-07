@@ -1852,6 +1852,22 @@ static void process_response(wget_http_response_t *resp)
 	}
 }
 
+static void write_spider_output(const char *url_to_write)
+{
+	if (!config.spider || !config.spider_output)
+		return;
+
+	int fd = open(config.spider_output, O_WRONLY | O_APPEND);
+	if (fd == -1)
+		return;
+
+	size_t rc = safe_write(fd, url_to_write, strlen(url_to_write));
+	if (safe_write(fd, "\n", 1) == SAFE_WRITE_ERROR || rc == SAFE_WRITE_ERROR)
+		error_printf(_("Failed to write to '%s' (%zu, errno=%d)\n"), config.spider_output, rc, errno);
+
+	close(fd);
+}
+
 enum actions {
 	ACTION_GET_JOB = 1,
 	ACTION_GET_RESPONSE = 2,
@@ -1892,6 +1908,9 @@ void *downloader_thread(void *p)
 				}
 				break;
 			}
+//printf("\x1b[34murl: %s\n\x1b[0m", job->iri->uri);
+			if (config.spider && config.spider_output)
+				write_spider_output(job->iri->uri);
 
 			wget_thread_mutex_unlock(&main_mutex); locked = 0;
 
