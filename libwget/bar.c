@@ -135,7 +135,7 @@ struct _speed_report {
 
 static void _bar_update_speed(int64_t cur_bytes, int slot)
 {
-	/*struct _speed_report *SReport = &speed_r[slot];
+	struct _speed_report *SReport = &speed_r[slot];
 	unsigned int *ringpos = &SReport->pos;
 	SReport->total_bytes -= SReport->bytes[*ringpos];
 	SReport->total_time -= SReport->times[*ringpos];
@@ -146,18 +146,7 @@ static void _bar_update_speed(int64_t cur_bytes, int slot)
 	SReport->last_update_time = wget_get_timemillis();
 	SReport->old_cur_bytes = (unsigned long long)cur_bytes;
 	if (++(*ringpos) == RING_POSITIONS)
-		*ringpos = 0; // reset*/
-	unsigned int ringpos = speed_r[slot].pos;
-	speed_r[slot].total_bytes -= speed_r[slot].bytes[ringpos];
-	speed_r[slot].total_time -= speed_r[slot].times[ringpos];
-	speed_r[slot].bytes[ringpos] = cur_bytes - speed_r[slot].old_cur_bytes;
-	speed_r[slot].times[ringpos] = wget_get_timemillis() - speed_r[slot].last_update_time;
-	speed_r[slot].total_bytes += speed_r[slot].bytes[ringpos];
-	speed_r[slot].total_time += speed_r[slot].times[ringpos];
-	speed_r[slot].last_update_time = wget_get_timemillis();
-	speed_r[slot].old_cur_bytes = (unsigned long long)cur_bytes;
-	if (++speed_r[slot].pos == RING_POSITIONS)
-		speed_r[slot].pos = 0; // reset
+		*ringpos = 0; // reset
 }
 
 static char report_speed_type = WGET_REPORT_SPEED_BYTES;
@@ -239,7 +228,7 @@ static void _bar_update_slot(const wget_bar_t *bar, int slot)
 
 		_bar_update_speed(cur, slot);
 		if (SReport->total_time)
-			human_readable_speed = wget_human_readable(speed_buf, sizeof(speed_buf), ((SReport->total_bytes*mod)/SReport->total_time))/*SReport->total_bytes*//*speed_r[slot].total_bytes*//*)*/;
+			human_readable_speed = wget_human_readable(speed_buf, sizeof(speed_buf), ((SReport->total_bytes*mod)/SReport->total_time));
 		else
 			human_readable_speed = wget_human_readable(speed_buf, sizeof(speed_buf), 0);
 		_bar_set_progress(bar, slot);
@@ -358,24 +347,6 @@ wget_bar_t *wget_bar_init(wget_bar_t *bar, int nslots)
 		memset(bar, 0, sizeof(*bar));
 
 	wget_bar_set_slots(bar, nslots);
- /* We should declare just 'nslots', but we'll a segmention fault if we do. Then we have to declare at least
- nslots+1 if we want to execute wget2. Then, pressing Control+C we'll get segmention fault again. If we declare
- something more big (like nslots*10) then we won't get the segmentation faults. That's why I think that the
- problem is in the memory allocation
-  */
-	speed_r = wget_calloc(nslots*10, sizeof(struct _speed_report)/*+100000*/);
-	/*speed_r = wget_malloc(nslots * sizeof(struct _speed_report));
-	for (int i = 0; i < nslots; i++) {
-		speed_r[i].pos = 0;
-		speed_r[i].total_time = 0;
-		speed_r[i].total_bytes = 0;
-		speed_r[i].last_update_time = wget_get_timemillis();
-		speed_r[i].old_cur_bytes = 0;
-		for (int x = 0; x < RING_POSITIONS; x++) {
-			speed_r[i].times[x] = 0;
-			speed_r[i].bytes[x] = 0;
-		}
-	}*/
 
 	return bar;
 }
@@ -399,7 +370,11 @@ void wget_bar_set_slots(wget_bar_t *bar, int nslots)
 		xfree(bar->slots);
 		bar->slots = xcalloc(nslots, sizeof(_bar_slot_t));
 		bar->nslots = nslots;
+		speed_r = wget_realloc(speed_r, nslots * sizeof(struct _speed_report));
+		memset(&speed_r[nslots - more_slots], 0, more_slots * sizeof(struct _speed_report));
+		unsigned long long cur_time = wget_get_timemillis();
 		for (int i = 0; i < more_slots; i++) {
+			speed_r[nslots - more_slots + i].last_update_time = cur_time;
 			printf("\n");
 		}
 		_bar_update_winsize(bar, true);
@@ -619,23 +594,5 @@ void wget_bar_set_speed_type(char type)
 	report_speed_type = type;
 	if (type == WGET_REPORT_SPEED_BITS)
 		report_speed_type_char = 'b';
-}
-
-void wget_bar_set_speed_start_time(wget_bar_t *bar)
-{
-	unsigned long long cur_time = wget_get_timemillis();
-	/* This is (as every line) a provisional way to avoid the not inicialized values for 
-	 speed_r[0 to nslots-1].last_update_time, because if it is zero (set by calloc())
-	 we will get a times[0] value (in update_speed_report()) too high, and speed will be
-	 0 B/s in the first 3 second download. But forgetting this here there is another bug,
-	 if we try to download 3 files
-	 (this bug doesn't exist with 1 & 2) with max_thread >= 3 the last of the three will be showing
-	 0 B/s some time until it shows us the speed. If the uncomment '=' (in the following
-	 code line), so i <= bar->nslots, then this happens no more, but this shouldn't be done in this
-	 way (speed_r SHOULD exists from 0 to nslots-1). May this is because I've allocated nslots*10 (for debug).
-	*/
-	for (int i = 0; i </*=*/ bar->nslots; i++) {
-		speed_r[i].last_update_time = cur_time;
-	}
 }
 /** @}*/

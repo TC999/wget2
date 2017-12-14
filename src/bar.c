@@ -53,7 +53,6 @@ static wget_thread_t
 
 static void *_bar_update_thread(void *p G_GNUC_WGET_UNUSED)
 {
-	wget_bar_set_speed_start_time(bar);
 	for (;;) {
 		wget_bar_update(bar);
 
