@@ -390,7 +390,6 @@ void wget_bar_set_slots(wget_bar_t *bar, int nslots)
 		bar->nslots = nslots;
 		speed_r = wget_realloc(speed_r, nslots * sizeof(struct _speed_report));
 		memset(&speed_r[nslots - more_slots], 0, more_slots * sizeof(struct _speed_report));
-		unsigned long long cur_time = wget_get_timemillis();
 		for (int i = 0; i < more_slots; i++)
 			printf("\n");
 
