@@ -2320,7 +2320,7 @@ WGETAPI void
 WGETAPI void
 	wget_bar_write_line(wget_bar_t *bar, const char *buf, size_t len) G_GNUC_WGET_NONNULL_ALL;
 WGETAPI void
-	wget_bar_set_speed_type(char type);
+	wget_bar_set_speed_type(char rs_type);
 
 /*
  * Console routines
