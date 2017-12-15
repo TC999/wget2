@@ -116,7 +116,7 @@ struct _wget_bar_st {
 		mutex;
 };
 
-/* 24 positions with a 125ms return time is at least 
+/* 24 positions with a 125ms return time is at least
  * the average of the last 3 seconds */
 #define RING_POSITIONS 24
 
@@ -131,7 +131,9 @@ struct _speed_report {
 
 	unsigned long long old_cur_bytes;
 	unsigned long long last_update_time;
-} *speed_r;
+};
+
+static struct _speed_report *speed_r;
 
 static void _bar_update_speed(int64_t cur_bytes, int slot)
 {
