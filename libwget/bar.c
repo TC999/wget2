@@ -131,6 +131,10 @@ struct _speed_report {
 
 	unsigned long long old_cur_bytes;
 	unsigned long long last_update_time;
+
+	unsigned long long last_redraw_time;
+
+	char speed_buf[16];
 };
 
 static struct _speed_report *speed_r;
@@ -142,7 +146,10 @@ static void _bar_update_speed(int64_t cur_bytes, int slot)
 	SReport->total_bytes -= SReport->bytes[*ringpos];
 	SReport->total_time -= SReport->times[*ringpos];
 	SReport->bytes[*ringpos] = cur_bytes - SReport->old_cur_bytes;
-	SReport->times[*ringpos] = wget_get_timemillis() - SReport->last_update_time;
+
+	if (SReport->last_update_time)
+		SReport->times[*ringpos] = wget_get_timemillis() - SReport->last_update_time;
+
 	SReport->total_bytes += SReport->bytes[*ringpos];
 	SReport->total_time += SReport->times[*ringpos];
 	SReport->last_update_time = wget_get_timemillis();
@@ -204,6 +211,9 @@ _bar_set_progress(const wget_bar_t *bar, int slot)
 	}
 }
 
+/* The time in ms between every speed calculation */
+#define SPEED_REDRAW_TIME 400
+
 static void _bar_update_slot(const wget_bar_t *bar, int slot)
 {
 	_bar_slot_t *slotp = &bar->slots[slot];
@@ -216,7 +226,6 @@ static void _bar_update_slot(const wget_bar_t *bar, int slot)
 		int ratio;
 		char *human_readable_bytes;
 		char *human_readable_speed;
-		char speed_buf[16];
 		unsigned int mod = 1000;
 		if (report_speed_type == WGET_REPORT_SPEED_BITS)
 			mod *= 8;
@@ -229,10 +238,17 @@ static void _bar_update_slot(const wget_bar_t *bar, int slot)
 		human_readable_bytes = wget_human_readable(slotp->human_size, sizeof(slotp->human_size), cur);
 
 		_bar_update_speed(cur, slot);
-		if (SReport->total_time)
-			human_readable_speed = wget_human_readable(speed_buf, sizeof(speed_buf), ((SReport->total_bytes*mod)/SReport->total_time));
+
+		unsigned long long cur_time = wget_get_timemillis();
+		if (SReport->total_time && (cur_time - SReport->last_redraw_time) > SPEED_REDRAW_TIME) {
+			human_readable_speed = wget_human_readable(SReport->speed_buf, sizeof(SReport->speed_buf), ((SReport->total_bytes*mod)/(SReport->total_time)));
+			SReport->last_redraw_time = cur_time;
+		}
+		else if (!SReport->total_time)
+			human_readable_speed = wget_human_readable(SReport->speed_buf, sizeof(SReport->speed_buf), 0);
 		else
-			human_readable_speed = wget_human_readable(speed_buf, sizeof(speed_buf), 0);
+			human_readable_speed = SReport->speed_buf;
+
 		_bar_set_progress(bar, slot);
 
 		_bar_print_slot(bar, slot);
@@ -375,10 +391,9 @@ void wget_bar_set_slots(wget_bar_t *bar, int nslots)
 		speed_r = wget_realloc(speed_r, nslots * sizeof(struct _speed_report));
 		memset(&speed_r[nslots - more_slots], 0, more_slots * sizeof(struct _speed_report));
 		unsigned long long cur_time = wget_get_timemillis();
-		for (int i = 0; i < more_slots; i++) {
-			speed_r[nslots - more_slots + i].last_update_time = cur_time;
+		for (int i = 0; i < more_slots; i++)
 			printf("\n");
-		}
+
 		_bar_update_winsize(bar, true);
 		_bar_update(bar);
 	}
