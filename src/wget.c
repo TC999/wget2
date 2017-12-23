@@ -1079,6 +1079,14 @@ static void print_progress_report(long long start_time)
 		rs_type, stats.nredirects, queue_size());
 }
 
+static void print_head_progress_report(void)
+{
+	char quota_buf[16];
+	bar_printf(nthreads, "Headers: %d (including %d redirects and %d errors) Bytes: %s  Todo: %d",
+		(stats.nerrors+stats.ndownloads+stats.nredirects+stats.nnotmodified), stats.nredirects,
+		stats.nerrors, wget_human_readable(quota_buf, sizeof(quota_buf), quota), queue_size());
+}
+
 int main(int argc, const char **argv)
 {
 	int n, rc;
@@ -1192,10 +1200,11 @@ int main(int argc, const char **argv)
 	if (!config.progress && config.force_progress)
 		config.progress = 1;
 
-	if (config.progress) {
+	if (config.progress || config.head_progress) {
 		wget_logger_set_stream(wget_get_logger(WGET_LOGGER_INFO), NULL);
 		bar_init();
-		start_time = wget_get_timemillis();
+		if (config.progress)
+			start_time = wget_get_timemillis();
 	}
 
 	downloaders = wget_calloc(config.max_threads, sizeof(DOWNLOADER));
@@ -1220,7 +1229,9 @@ int main(int argc, const char **argv)
 			}
 		}
 
-		if (config.progress)
+		if (config.head_progress)
+			print_head_progress_report();
+		else if (config.progress)
 			print_progress_report(start_time);
 
 		if (config.quota && quota >= config.quota) {
@@ -1247,7 +1258,10 @@ int main(int argc, const char **argv)
 			error_printf(_("Failed to wait for downloader #%d (%d %d)\n"), n, rc, errno);
 	}
 
-	if (config.progress)
+
+	if (config.head_progress)
+		print_head_progress_report();
+	else if (config.progress)
 		print_progress_report(start_time);
 	else if ((config.recursive || config.page_requisites || (config.input_file && quota != 0)) && quota) {
 		info_printf(_("Downloaded: %d files, %s bytes, %d redirects, %d errors\n"),
@@ -2913,6 +2927,26 @@ static int G_GNUC_WGET_NONNULL((1)) _prepare_file(wget_http_response_t *resp, co
 	return fd;
 }
 
+// returns a pointer to the filename
+static const char *get_head_name(const char *url)
+{
+	const char *ret;
+	if ((ret = strstr(url, "://")) != NULL)
+		ret += 3;
+	else
+		ret = &url[0];
+
+	unsigned int i;
+	unsigned int ret_size = strlen(ret)-1;
+	for (i = ret_size; i > 0 && ret[i] != '/'; i--);
+	if (i == ret_size || !i)
+		ret = NULL;
+	else
+		ret = &ret[i+1];
+
+	return ret;
+}
+
 // context used for header and body callback
 struct _body_callback_context {
 	JOB *job;
@@ -2984,8 +3018,17 @@ static int _get_header(wget_http_response_t *resp, void *context)
 #endif
 
 out:
-	if (config.progress)
+	if (config.progress && !config.head_progress)
 		bar_slot_begin(ctx->progress_slot, name, resp->content_length);
+	else if (config.head_progress) {
+		char head_size[16];
+		const char *head_name = get_head_name(ctx->job->iri->uri);
+		if (!head_name)
+			head_name = "index";
+		bar_slot_begin(ctx->progress_slot, head_name, resp->header->length);
+		bar_set_downloaded(ctx->progress_slot, resp->header->length);
+		quota_modify_read(resp->header->length);
+	}
 
 	return ret;
 }
@@ -3309,7 +3352,7 @@ int http_send_request(wget_iri_t *iri, wget_iri_t *original_url, DOWNLOADER *dow
 	wget_http_request_set_body_cb(req, _get_body, context);
 
 	// keep the received response header in 'resp->header'
-	wget_http_request_set_int(req, WGET_HTTP_RESPONSE_KEEPHEADER, config.save_headers || config.server_response);
+	wget_http_request_set_int(req, WGET_HTTP_RESPONSE_KEEPHEADER, config.save_headers || config.server_response || config.head_progress);
 
 	return WGET_E_SUCCESS;
 }
