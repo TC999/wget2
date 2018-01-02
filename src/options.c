@@ -99,8 +99,10 @@ typedef enum {
 	SECTION_HTTP = 2,
 	SECTION_SSL = 3,
 	SECTION_DIRECTORY = 4,
-	SECTION_GPG = 5,
-	SECTION_END = 6,
+#ifdef WITH_GPGME
+	SECTION_GPG,
+#endif
+	SECTION_END,
 } help_section_t;
 
 typedef const struct optionw *option_t; // forward declaration
@@ -906,6 +908,9 @@ struct config config = {
 	.ocsp_stapling = 1,
 	.netrc = 1,
 	.waitretry = 10 * 1000,
+#ifdef WITH_GPGME
+	.sig_ext = "sig",
+#endif
 	.metalink = 1,
 	.tls_false_start = 1,
 	.proxy = 1,
@@ -1671,6 +1676,14 @@ static const struct optionw options[] = {
 		{ "Print the server response headers. (default: off)\n"
 		}
 	},
+#ifdef WITH_GPGME
+	{ "signature-extension", &config.sig_ext, parse_string, 1, 0,
+		SECTION_GPG,
+		{ "The extension of the signature file which should be downloaded\n",
+		  "(default: sig)\n"
+		}
+	},
+#endif
 	{ "span-hosts", &config.span_hosts, parse_bool, -1, 'H',
 		SECTION_DOWNLOAD,
 		{ "Span hosts that were not given on the\n",
@@ -1883,9 +1896,11 @@ static int print_help(G_GNUC_WGET_UNUSED option_t opt, G_GNUC_WGET_UNUSED const 
 			printf("Directory options:\n");
 			break;
 
+#ifdef WITH_GPG
 		case SECTION_GPG:
 			printf("GPG related options:\n");
 			break;
+#endif
 
 		case SECTION_END:
 			break;
@@ -2508,14 +2523,19 @@ int init(int argc, const char **argv)
 	// Initialize some configuration values which depend on the Runtime environment
 	char *home_dir = get_home_dir();
 
-	// the following strdup's are just needed for reallocation/freeing purposes to
-	// satisfy valgrind
+	// We need these because the parse_string() method will attempt to free the
+	// value before setting a new one. Hence, these must be dynamically
+	// allocated
 	config.user_agent = wget_strdup(config.user_agent);
 	config.secure_protocol = wget_strdup(config.secure_protocol);
 	config.ca_directory = wget_strdup(config.ca_directory);
 	config.default_page = wget_strdup(config.default_page);
 	config.domains = wget_vector_create(16, -2, (wget_vector_compare_t)strcmp);
+#ifdef WITH_GPGME
+	config.sig_ext = wget_strdup(config.sig_ext);
+#endif
 //	config.exclude_domains = wget_vector_create(16, -2, NULL);
+
 
 	// create list of default config file names
 	const char *env;
@@ -2891,6 +2911,9 @@ void deinit(void)
 	xfree(config.save_cookies);
 	xfree(config.secure_protocol);
 	xfree(config.tls_session_file);
+#ifdef WITH_GPGME
+	xfree(config.sig_ext);
+#endif
 	xfree(config.user_agent);
 	xfree(config.use_askpass_bin);
 	xfree(config.username);
