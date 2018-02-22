@@ -1232,8 +1232,7 @@ static const struct optionw options[] = {
 	},
 	{ "force-atom", &config.force_atom, parse_bool, -1, 0,
 		SECTION_STARTUP,
-		{ "Treat input file as Atom Feed.\n",
-		  "(default: off) (NEW!)\n"
+		{ "Treat input file as Atom Feed. (default: off) (NEW!)\n"
 		}
 	},
 	{ "force-css", &config.force_css, parse_bool, -1, 0,
@@ -1254,8 +1253,7 @@ static const struct optionw options[] = {
 	},
 	{ "force-metalink", &config.force_metalink, parse_bool, -1, 0,
 		SECTION_STARTUP,
-		{ "Treat input file as Metalink.\n",
-		  "(default: off) (NEW!)\n"
+		{ "Treat input file as Metalink. (default: off) (NEW!)\n"
 		}
 	},
 	{ "force-progress", &config.force_progress, parse_bool, -1, 0,
@@ -1266,8 +1264,7 @@ static const struct optionw options[] = {
 	},
 	{ "force-rss", &config.force_rss, parse_bool, -1, 0,
 		SECTION_STARTUP,
-		{ "Treat input file as RSS Feed.\n",
-		  "(default: off) (NEW!)\n"
+		{ "Treat input file as RSS Feed. (default: off) (NEW!)\n"
 		}
 	},
 	{ "force-sitemap", &config.force_sitemap, parse_bool, -1, 0,
@@ -1390,7 +1387,8 @@ static const struct optionw options[] = {
 	{ "https-enforce", &config.https_enforce, parse_https_enforce, 1, 0,
 		SECTION_SSL,
 		{ "Use secure HTTPS instead of HTTP. Legal types are\n",
-                  "'hard', 'soft' and 'none'. If --https-only is enabled,\n",
+                  "'hard', 'soft' and 'none'.\n",
+                  "If --https-only is enabled,\n",
                   "this option has no effect. (default: none)\n"
 		}
 	},
@@ -1584,7 +1582,8 @@ static const struct optionw options[] = {
 	{ "plugin-opt", NULL, parse_plugin_option, 1, 0,
 		SECTION_PLUGIN,
 		{ "Forward an option to a loaded plugin.\n",
-		  "The option should be in format <plugin_name>.<option>[=value]\n"
+		  "The option should be in format:\n",
+		  "<plugin_name>.<option>[=value]\n"
 		}
 	},
 	{ "post-data", &config.post_data, parse_string, 1, 0,
@@ -1870,8 +1869,8 @@ static const struct optionw options[] = {
 	},
 	{ "user-agent", &config.user_agent, parse_string, 1, 'U',
 		SECTION_HTTP,
-		{ "Username for Authentication.\n",
-		  "(default: empty username)\n"
+		{ "HTTP User Agent string.\n",
+		  "(default: wget)\n"
 		}
 	},
 	{ "verbose", &config.verbose, parse_bool, -1, 'v',
@@ -1925,14 +1924,14 @@ static int print_help(G_GNUC_WGET_UNUSED option_t opt, G_GNUC_WGET_UNUSED const 
 #else
 static inline void print_first(const char s, const char *l, const char *msg)
 {
-	if (strlen(l) > 20) {
-		printf("  %c%-3c--%s\n",
+	if (strlen(l) > 18) {
+		printf("  %c%-2c --%s\n",
 			(s ? '-' : ' '),
 			(s ? s : ' '),
 			l);
 		printf("%28s%s", "", msg);
 	} else
-		printf("  %c%-3c --%-18.18s  %s",
+		printf("  %c%-2c --%-18.18s  %s",
 			(s ? '-' : ' '),
 			(s ? s : ' '),
 			l, msg);
@@ -1940,7 +1939,7 @@ static inline void print_first(const char s, const char *l, const char *msg)
 
 static inline void print_next(const char *msg)
 {
-	printf("%29s%s", "", msg);
+	printf("%28s%s", "", msg);
 }
 
 static int print_help(G_GNUC_WGET_UNUSED option_t opt, G_GNUC_WGET_UNUSED const char *val, G_GNUC_WGET_UNUSED const char invert)
