@@ -1128,6 +1128,12 @@ wget_http_response_t *wget_http_get_response_cb(wget_http_connection_t *conn)
 	}
 
 	dc = wget_decompress_open(resp->content_encoding, _get_body, resp);
+
+	if (!dc) {
+		error_printf(_("Failed to open decompressor\n"));
+		goto cleanup;
+	}
+
 	wget_decompress_set_error_handler(dc, _decompress_error_handler);
 
 	// calculate number of body bytes so far read

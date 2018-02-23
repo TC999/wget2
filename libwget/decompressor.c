@@ -347,7 +347,7 @@ wget_decompressor_t *wget_decompress_open(int encoding,
 	void *context)
 {
 	wget_decompressor_t *dc = xcalloc(1, sizeof(wget_decompressor_t));
-	int rc = 0;
+	int rc = 1;
 
 	if (encoding == wget_content_encoding_gzip) {
 #ifdef WITH_ZLIB
@@ -387,6 +387,7 @@ wget_decompressor_t *wget_decompress_open(int encoding,
 	} else {
 		// identity
 		dc->decompress = identity;
+		rc = 0;
 	}
 
 	if (rc) {
