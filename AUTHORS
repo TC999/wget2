@@ -1,27 +1,20 @@
 Authors of and contributors to Wget2.
 Thank you very much for spending your time !
 
+This list is maintained in no particular order.
+
 Design and implementation of Wget2 and libwget:
 Tim Rühsen (rockdaboot)
 
 Maintainers:
-Darshit Shah
-Giuseppe Scrivano
-Tim Rühsen
+Darshit Shah *darnir [at] gnu.org*
+Giuseppe Scrivano *gscrivano [at] gnu.org*
+Tim Rühsen *tim.ruehsen [at] gmx.de*
 
 Contributors:
-Akash Rawal
-Ander Juaristi
-Andries E. Brouwer
-Ant Bryan
-Avinash Sonawane
-Benoit Goudreault-Emond
-Dagobert Michelsen
-Eli Zaretskii
-Didik Setiawan
-Gianluca Varisco
-Gisle Vanem
-Jaaap@github.com
-magemore
-Michael Heerklotz
-Vijo Cherian
+Ander Juaristi *ajuaristi [at] gmx.es*
+Avinash Sonawane *rootkea [at] gmail.com*
+Didik Setiawan *ds [at] didiksetiawan.com*
+Gisle Vanem *gvanem [at] yahoo.no*
+Neil Locketz *neil [at] nlocketz.com*
+Vijo Cherian *codervijo [at] gmail.com*
