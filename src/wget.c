@@ -84,6 +84,22 @@
 #  include "wget_gpgme.h"
 #endif
 
+// Creation of bitmap.
+#ifdef bitmap_64
+#define bitmap_type unsigned long long int 
+#define bitmap_shift 6
+#define bitmap_mask 63
+#define bitmap_wordlength 64
+#define bitmap_fmt "%016llx"
+
+#define bitmap_one (bitmap_type)1
+
+typedef struct {
+    int bits; // number of bits in the array
+    int words; // number of words in the array
+    bitmap_type *array;
+} bitmap;
+
 // flags for add_url()
 #define URL_FLG_REDIRECTION  (1<<0)
 #define URL_FLG_SITEMAP      (1<<1)
@@ -123,6 +139,12 @@ static _statistics_t stats;
 static int G_GNUC_WGET_NONNULL((1)) _prepare_file(wget_http_response_t *resp, const char *fname, int flag,
 		const char *uri, const char *original_url, int ignore_patterns, wget_buffer_t *partial_content,
 		size_t max_partial_content, char **actual_file_name);
+
+void bitmap_set(bitmap *b, int n); // Here n is a bit index
+void bitmap_clear(bitmap *b, int n);
+void bitmap_get(bitmap *b, int n);
+bitmap * bitmap_allocate(int bits);
+void bitmap_deallocate(bitmap *b);
 
 static void
 	sitemap_parse_xml(JOB *job, const char *data, const char *encoding, wget_iri_t *base),
@@ -165,6 +187,43 @@ static volatile int
 	terminate;
 static int
 	nthreads;
+
+void bitmap_set(bitmap *b, int n)
+{
+    int word = n >> bitmap_shift; // n / bitmap_wordlength
+    int position = n & bitmap_mask; // n % bitmap_wordlength
+    b->array[word] |= bitmap_one << position;
+}
+
+void bitmap_clear(bitmap *b, int n)
+{
+    int word = n >> bitmap_shift; // n / bitmap_wordlength
+    int position = n & bitmap_mask; // n % bitmap_wordlength
+    b->array[word] &= ~(bitmap_one << position); 
+}
+
+void bitmap_get(bitmap *b, int n)
+{
+    int word = n >> bitmap_shift;
+    int position = n & bitmap_mask;
+    return (b->array[word] >> position) & 1;
+}
+
+bitmap * bitmap_allocate(int bits)
+{
+    bitmap *b = malloc(sizeof(bitmap));
+    b->bits = bits;
+    b->words = (bits + bitmap_wordlength - 1) / bitmap_wordlength;
+        // divide, but round up for the ceiling
+    b->array = calloc(b->words, sizeof(bitmap_type));
+    return b;
+}
+
+void bitmap_deallocate(bitmap *b)
+{
+    free(b->array);
+    free(b);
+}
 
 // this function should be called protected by a mutex - else race conditions will happen
 static void mkdir_path(char *fname)
@@ -1619,6 +1678,8 @@ static int process_response_header(wget_http_response_t *resp)
 	return 0;
 }
 
+static bool check_content_error_list(wget_vector_t *list, const char *content);
+
 static bool check_mime_list(wget_vector_t *list, const char *mime);
 
 static void process_head_response(wget_http_response_t *resp)
@@ -1639,7 +1700,8 @@ static void process_head_response(wget_http_response_t *resp)
 			&& (!job->sitemap || !wget_strcasecmp_ascii(resp->content_type, "application/xml"))
 			&& (!job->sitemap || !wget_strcasecmp_ascii(resp->content_type, "application/x-gzip"))
 			&& (!job->sitemap || !wget_strcasecmp_ascii(resp->content_type, "text/plain"))
-			&& (!config.mime_types || !check_mime_list(config.mime_types, resp->content_type)))
+			&& (!config.mime_types || !check_mime_list(config.mime_types, resp->content_type))
+            && (!config.save_content_on || !check_content_error_list(config.save_content_on, resp->content_type)))
 		{
 			return;
 		}
@@ -3150,6 +3212,8 @@ static int _get_header(wget_http_response_t *resp, void *context)
 		if (ctx->outfd == -1)
 			ret = -1;
 	}
+
+
 //	info_printf("Opened %d\n", ctx->outfd);
 
 #ifdef _WIN32
@@ -3180,6 +3244,30 @@ out:
 	}
 
 	return ret;
+}
+
+// Parser function for --save-content-on=. Return 0 if content won't be downloaded and 1 if it will
+
+static bool check_content_error_list(wget_vector_t *list, const char *content)
+{
+    char result = 0;
+
+    for (int i = 0; i < wget_vector_size(list); i++) {
+        char *entry = wget_vector_get(list, i);
+        bool exclude = (*entry == '!');
+
+        debug_printf("content check %s - %s", entry, content);
+
+        entry += exclude;
+
+        if (strpbrk(entry, "*") && !fnmatch(entry, content, FNM_CASEFOLD))
+            result = !exclude;
+        else if (!wget_strcasecmp(entry, content))
+            result = !exclude;
+    }
+
+    debug_printf("content check %d", result);
+    return result;
 }
 
 static int _get_body(wget_http_response_t *resp, void *context, const char *data, size_t length)

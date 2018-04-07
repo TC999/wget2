@@ -1673,6 +1673,11 @@ static const struct optionw options[] = {
 		{ "Save cookies to file.\n"
 		}
 	},
+    { "save-content-on", &config.save_content_on, parse_stringlist, 1, 0,
+        SECTION_DOWNLOAD,
+        {"Specify a list of response codes that requires it's response body to be saved on error status\n"
+        }
+    },
 	{ "save-headers", &config.save_headers, parse_bool, -1, 0,
 		SECTION_HTTP,
 		{ "Save the response headers in front of the response\n",
@@ -2967,6 +2972,7 @@ void deinit(void)
 
 	wget_iri_free(&config.base);
 
+    wget_vector_free(&config.save_content_on);
 	wget_vector_free(&config.mime_types);
 	wget_vector_free(&config.domains);
 	wget_vector_free(&config.exclude_domains);
