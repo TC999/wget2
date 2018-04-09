@@ -475,6 +475,40 @@ WGETAPI char *
 	wget_base64_encode_printf_alloc(const char *restrict fmt, ...) G_GNUC_WGET_PRINTF_FORMAT(1,2) G_GNUC_WGET_NONNULL_ALL;
 
 /*
+ * Bitmap routines
+ */
+
+#ifdef bitmap_64
+#   define bitmap_type unsigned long long int
+#else
+#   define bitmap_type unsigned int
+#endif
+
+typedef struct {
+    int
+        bits; // number of bits in the array.
+    int 
+        words; //number of words in the array.
+    bitmap_type*
+        array;
+} wget_bitmap_t;
+
+WGETAPI void
+    wget_bitmap_set(wget_bitmap_t *b, int n); // n is the index
+WGETAPI void
+    wget_bitmap_clear(wget_bitmap_t *b, int n);
+WGETAPI int 
+    wget_bitmap_read(wget_bitmap_t *b, int n);
+
+WGETAPI wget_bitmap_t*
+    wget_bitmap_allocate(int bits);
+WGETAPI void
+    wget_bitmap_deallocate(wget_bitmap_t *b);
+
+WGETAPI void
+    wget_bitmap_print(wget_bitmap_t *b); //A test function to see if bitmap is working properly. 
+
+/*
  * Buffer routines
  */
 
