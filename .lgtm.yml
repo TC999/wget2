@@ -6,3 +6,4 @@ extraction:
         - libgpgme11-dev
     configure:
       command: ./configure --disable-doc
+
