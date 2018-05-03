@@ -27,6 +27,7 @@ WGET_TESTS = test-wget-1$(EXEEXT) test-c-r$(EXEEXT) test-restrict-ascii$(EXEEXT)
  test--https-enforce-soft1$(EXEEXT) test--https-enforce-soft2$(EXEEXT) test--https-enforce-soft3$(EXEEXT)\
  test-gzip$(EXEEXT) test-compression$(EXEEXT)
 #test--post-file$(EXEEXT) test-E-k$(EXEEXT) test-cookies-http_state$(EXEEXT)
+XFAIL_TESTS = test-np-p$(EXEEXT)
 
 if WITH_GPGME
  WGET_TESTS += test-gpg-valid$(EXEEXT) test-gpg-invalid$(EXEEXT) test-gpg-missing$(EXEEXT) test-gpg-styles$(EXEEXT) test-gpg-bad$(EXEEXT) \
@@ -43,7 +44,7 @@ if PLUGIN_SUPPORT
   libpluginapi.la libplugindb.la
 endif
 
-check_PROGRAMS = $(WGET_TESTS)
+check_PROGRAMS = $(WGET_TESTS) $(XFAIL_TESTS)
 
 test_stats_all_SOURCES = test-stats-all.c stats-test-util.h
 test_stats_dns_SOURCES = test-stats-dns.c stats-test-util.h
@@ -64,7 +65,7 @@ clean-local:
 
 AM_TESTS_ENVIRONMENT = export VALGRIND_TESTS"=@VALGRIND_TESTS@";\
  export LSAN_OPTIONS=suppressions="$(abs_srcdir)/clang-asan-suppressions";
-TESTS = $(WGET_TESTS)
+TESTS = $(WGET_TESTS) $(XFAIL_TESTS)
 
 #Test plugins for plugin related testing
 dummy_ldflags = -avoid-version -module -shared -no-undefined \
