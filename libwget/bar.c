@@ -219,6 +219,10 @@ _bar_set_progress(const wget_bar_t *bar, int slot)
 	slotp->progress[bar->max_width] = 0;
 }
 
+/* The minimum time in ms a download process has to last to start printing
+   speed report information */
+#define MIN_DELAY_TIME 500
+
 /* The time in ms between every speed calculation */
 #define SPEED_REDRAW_TIME 400
 
@@ -249,12 +253,14 @@ static void _bar_update_slot(const wget_bar_t *bar, int slot)
 		_bar_update_speed(cur, slot);
 
 		uint64_t cur_time = wget_get_timemillis();
-		if (SReport->total_time && (cur_time - SReport->last_redraw_time) > SPEED_REDRAW_TIME) {
+		if (SReport->total_time < MIN_DELAY_TIME && !SReport->last_redraw_time) {
+			human_readable_speed = memcpy(SReport->speed_buf, "-.-\0", 4);
+			SReport->last_redraw_time = cur_time;
+		}
+		else if ((cur_time - SReport->last_redraw_time) > SPEED_REDRAW_TIME) {
 			human_readable_speed = wget_human_readable(SReport->speed_buf, sizeof(SReport->speed_buf), ((SReport->total_bytes*mod)/(SReport->total_time)));
 			SReport->last_redraw_time = cur_time;
 		}
-		else if (!SReport->total_time)
-			human_readable_speed = wget_human_readable(SReport->speed_buf, sizeof(SReport->speed_buf), 0);
 		else
 			human_readable_speed = SReport->speed_buf;
 
@@ -423,6 +429,7 @@ void wget_bar_slot_begin(wget_bar_t *bar, int slot, const char *filename, ssize_
 {
 	wget_thread_mutex_lock(bar->mutex);
 	_bar_slot_t *slotp = &bar->slots[slot];
+	struct _speed_report *slot_speed = &speed_r[slot];
 
 	xfree(slotp->filename);
 	slotp->filename = wget_strdup(filename);
@@ -431,6 +438,17 @@ void wget_bar_slot_begin(wget_bar_t *bar, int slot, const char *filename, ssize_
 	slotp->bytes_downloaded = 0;
 	slotp->status = DOWNLOADING;
 	slotp->redraw = 1;
+	slot_speed->total_time = 0;
+	slot_speed->total_bytes = 0;
+	slot_speed->old_cur_bytes = 0;
+	slot_speed->last_update_time = 0;
+	slot_speed->last_redraw_time = 0;
+	slot_speed->pos = 0;
+	unsigned int ringpos = 0;
+	for (; ringpos < RING_POSITIONS; ringpos++) {
+		slot_speed->times[ringpos] = 0;
+		slot_speed->bytes[ringpos] = 0;
+	}
 	wget_thread_mutex_unlock(bar->mutex);
 }
 
