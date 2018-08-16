@@ -3153,6 +3153,7 @@ struct _body_callback_context {
 	wget_buffer_t *body;
 	uint64_t max_memory;
 	uint64_t length;
+	uint64_t file_size;
 	int outfd;
 	int progress_slot;
 };
@@ -3237,8 +3238,9 @@ out:
 
 		if (!wget_strcasecmp_ascii(resp->req->method, "HEAD")) {
 			bar_slot_begin(ctx->progress_slot, name, resp->header->length);
-			bar_set_downloaded(ctx->progress_slot, resp->header->length);
+			bar_set_downloaded(ctx->progress_slot, resp->header->length, resp->header->length);
 		} else {
+			ctx->file_size = resp->content_length;
 			bar_slot_begin(ctx->progress_slot, name, resp->content_length);
 		}
 
@@ -3287,7 +3289,7 @@ static int _get_body(wget_http_response_t *resp, void *context, const char *data
 		wget_buffer_memcat(ctx->body, data, length); // append new data to body
 
 	if (config.progress)
-		bar_set_downloaded(ctx->progress_slot, resp->cur_downloaded);
+		bar_set_downloaded(ctx->progress_slot, ctx->file_size, resp->cur_downloaded);
 
 	return 0;
 }

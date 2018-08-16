@@ -2371,7 +2371,7 @@ WGETAPI void
 WGETAPI void
 	wget_bar_slot_begin(wget_bar_t *bar, int slot, const char *filename, ssize_t filesize) G_GNUC_WGET_NONNULL_ALL;
 WGETAPI void
-	wget_bar_slot_downloaded(wget_bar_t *bar, int slot, size_t nbytes);
+	wget_bar_slot_downloaded(wget_bar_t *bar, int slot, uint64_t file_size, size_t nbytes);
 WGETAPI void
 	wget_bar_slot_deregister(wget_bar_t *bar, int slot) G_GNUC_WGET_NONNULL_ALL;
 WGETAPI void

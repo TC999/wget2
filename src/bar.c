@@ -128,9 +128,9 @@ void bar_slot_begin(int slot, const char *filename, ssize_t filesize)
 	wget_bar_slot_begin(bar, slot, filename, filesize);
 }
 
-void bar_set_downloaded(int slot, size_t nbytes)
+void bar_set_downloaded(int slot,uint64_t file_size,  size_t nbytes)
 {
-	wget_bar_slot_downloaded(bar, slot, nbytes);
+	wget_bar_slot_downloaded(bar, slot, file_size, nbytes);
 }
 
 void bar_slot_deregister(int slot)

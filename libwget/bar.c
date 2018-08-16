@@ -429,14 +429,16 @@ void wget_bar_slot_begin(wget_bar_t *bar, int slot, const char *filename, ssize_
 /**
  * \param[in] bar Pointer to a wget_bar_t object
  * \param[in] slot The slot number to use
+ * \param[in] file_size The total size of the file
  * \param[in] nbytes The current number of bytes to display
  *
  * Set the current number of bytes for \p slot for the next update of
  * the bar/slot.
  */
-void wget_bar_slot_downloaded(wget_bar_t *bar, int slot, size_t nbytes)
+void wget_bar_slot_downloaded(wget_bar_t *bar, int slot, uint64_t file_size, size_t nbytes)
 {
 	wget_thread_mutex_lock(bar->mutex);
+	bar->slots[slot].file_size = file_size;
 	bar->slots[slot].bytes_downloaded = nbytes;
 	bar->slots[slot].redraw = 1;
 	wget_thread_mutex_unlock(bar->mutex);
