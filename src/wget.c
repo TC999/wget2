@@ -3236,10 +3236,10 @@ out:
 		}
 
 		if (!wget_strcasecmp_ascii(resp->req->method, "HEAD")) {
-			bar_slot_begin(ctx->progress_slot, name, resp->header->length);
+			bar_slot_begin(ctx->progress_slot, name, 0, resp->header->length);
 			bar_set_downloaded(ctx->progress_slot, resp->header->length);
 		} else {
-			bar_slot_begin(ctx->progress_slot, name, resp->content_length);
+			bar_slot_begin(ctx->progress_slot, name, ((resp->code == 200 || resp->code == 206) ? 1 : 0), resp->content_length);
 		}
 
 		xfree(filename);
@@ -3287,7 +3287,10 @@ static int _get_body(wget_http_response_t *resp, void *context, const char *data
 		wget_buffer_memcat(ctx->body, data, length); // append new data to body
 
 	if (config.progress)
-		bar_set_downloaded(ctx->progress_slot, length);
+	{
+		bar_set_downloaded(ctx->progress_slot, resp->cur_downloaded - resp->accounted_for);
+		resp->accounted_for = resp->cur_downloaded;
+	}
 
 	return 0;
 }
