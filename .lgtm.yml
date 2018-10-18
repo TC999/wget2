@@ -1,8 +1,6 @@
 path_classifiers:
   test:
-    - fuzz
-    - tests
-    - unit-tests
+    - unit-tests/files
 
 extraction:
   cpp:
