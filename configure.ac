@@ -345,14 +345,16 @@ if test "$enable_doc" = yes; then
   if test -n "$DOXYGEN" || test -n "$PANDOC"; then
     LIBWGET_DOCS_INFO="yes (found:"
     if test -n "$DOXYGEN"; then
-      LIBWGET_DOCS_INFO="$LIBWGET_DOCS_INFO Doxygen"
+      LIBWGET_DOCS_INFO+=" Doxygen)"
+	else
+	  LIBWGET_DOCS_INFO="no"
     fi
     WGET2_DOCS_INFO="yes (found:"
     if test -n "$PANDOC"; then
-      WGET2_DOCS_INFO="$WGET2_DOCS_INFO Pandoc"
+      WGET2_DOCS_INFO+=" Pandoc)"
+	else
+	  WGET2_DOCS_INFO="no"
     fi
-    LIBWGET_DOCS_INFO+=")"
-    WGET2_DOCS_INFO+=")"
   else
     DOCS_INFO="no (neither Doxygen nor Pandoc found)"
   fi
