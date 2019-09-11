@@ -1,6 +1,6 @@
 /*
- * Copyright(c) 2013-2014 Tim Ruehsen
- * Copyright(c) 2015-2019 Free Software Foundation, Inc.
+ * Copyright (c) 2013-2014 Tim Ruehsen
+ * Copyright (c) 2015-2019 Free Software Foundation, Inc.
  *
  * This file is part of libwget.
  *
@@ -34,18 +34,6 @@
 #define TESTS_LIBTEST_H
 
 #include <wget.h>
-
-// gnulib convenience header for libintl.h, turn of annoying warnings
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wundef"
-#include <gettext.h>
-#pragma GCC diagnostic pop
-
-#ifdef ENABLE_NLS
-#	define _(STRING) gettext(STRING)
-#else
-#	define _(STRING) STRING
-#endif
 
 #ifdef	__cplusplus
 extern "C" {

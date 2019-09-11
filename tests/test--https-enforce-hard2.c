@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2018-2019 Free Software Foundation, Inc.
+ * Copyright (c) 2018-2019 Free Software Foundation, Inc.
  *
  * This file is part of libwget.
  *
@@ -52,5 +52,5 @@ int main(void)
 		WGET_TEST_EXPECTED_ERROR_CODE,  4, // network error
 		0);
 
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
