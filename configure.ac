@@ -825,7 +825,7 @@ AC_CHECK_FUNCS([\
  strlcpy getuid fmemopen])
 
 # needed for src/version-text.h
-YEAR=`date +%Y`
+YEAR=`date -u -r NEWS +%Y`
 AC_SUBST([YEAR], $YEAR)
 
 AC_CONFIG_FILES([Makefile
