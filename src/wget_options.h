@@ -115,6 +115,7 @@ struct config {
 		*ocsp_file,
 		*netrc_file,
 		*use_askpass_bin,
+		*hostname,
 		*dns_cache_preload,
 		*method;
 	wget_vector
@@ -254,6 +255,7 @@ struct config {
 		verbose,
 		quiet,
 		debug,
+		hyperlink,
 		metalink,
 		cut_url_get_vars,
 		cut_file_get_vars,
