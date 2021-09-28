@@ -64,14 +64,14 @@ if ENABLE_MANYLIBS
 lib_LTLIBRARIES += libwget_alloc.la
 libwget_alloc_la_SOURCES =  xalloc.c
 libwget_alloc_la_CPPFLAGS = $(libwget_la_CPPFLAGS)
-libwget_alloc_la_LIBADD =  ../lib/libgnu.la
+libwget_alloc_la_LIBADD =  $(PTHREAD_LIBS) ../lib/libgnu.la
 libwget_alloc_la_LDFLAGS = $(libwget_la_LDFLAGS) -Wl,--no-whole-archive
 
 ######## libwget ip ########
 lib_LTLIBRARIES += libwget_ip.la
 libwget_ip_la_SOURCES =  ip.c
 libwget_ip_la_CPPFLAGS = $(libwget_la_CPPFLAGS)
-libwget_ip_la_LIBADD = $(INET_PTON_LIB) ../lib/libgnu.la
+libwget_ip_la_LIBADD = $(INET_PTON_LIB) $(PTHREAD_LIBS) ../lib/libgnu.la
 libwget_ip_la_LDFLAGS = $(libwget_la_LDFLAGS) -Wl,--no-whole-archive
 
 ######## libwget common ########
