@@ -20,6 +20,7 @@ dnl Error if AX_CODE_COVERAGE if missing.
 m4_pattern_forbid([^_?AX_])
 m4_pattern_allow([AX_CHECK_GNU_MAKE_HEADLINE])
 m4_pattern_allow([_AX_CODE_COVERAGE_GCOV_PROG_WITH])
+m4_pattern_allow([AX_PTHREAD])
 
 CFLAGS=$CFLAGS
 LDFLAGS=$LDFLAGS
@@ -62,6 +63,7 @@ gl_EARLY
 gl_INIT
 
 AX_CODE_COVERAGE
+AX_PTHREAD
 
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
@@ -946,9 +948,6 @@ AC_CONFIG_FILES([Makefile
                  docs/libwget.doxy
                  docs/wget2_md2man.sh])
 AC_OUTPUT
-
-# patching libtool, generated when coming here
-patch libtool contrib/libtool.patch
 
 AC_MSG_NOTICE([Summary of build options:
 
