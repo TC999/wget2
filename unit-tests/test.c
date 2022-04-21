@@ -374,9 +374,10 @@ static void test_buffer_printf(void)
 						}
 					}
 
+					memset(string, 0, sizeof(string));
 					for (it = 0; it < sizeof(string); it++) {
-						memset(string, 'a', it);
-						string[it] = 0;
+						if (it > 0)
+							string[it - 1] = 'a';
 
 #if defined __clang__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 						#pragma GCC diagnostic push
@@ -411,9 +412,10 @@ static void test_buffer_printf(void)
 						}
 					}
 
+					memset(string, 0, sizeof(string));
 					for (it = 0; it < sizeof(string); it++) {
-						memset(string, 'a', it);
-						string[it] = 0;
+						if (it > 0)
+							string[it - 1] = 'a';
 
 #if defined __clang__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 						#pragma GCC diagnostic push
