@@ -390,8 +390,8 @@ size_t wget_buffer_memcat(wget_buffer *buf, const void *data, size_t length)
 		else
 			memset(buf->data + buf->length, 0, length);
 		buf->length += length;
+		buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 	}
-	buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 
 	return buf->length;
 }
@@ -524,8 +524,8 @@ size_t wget_buffer_memset_append(wget_buffer *buf, char c, size_t length)
 
 		memset(buf->data + buf->length, c, length);
 		buf->length += length;
+		buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 	}
-	buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 
 	return buf->length;
 }
