@@ -548,18 +548,23 @@ char *wget_buffer_trim(wget_buffer *buf)
 		char *start = buf->data;
 		char *end = start + buf->length - 1;
 
-		if (isspace(*end)) {
+		/* Accessing `start - 1` is undefined so leave if `start == end` */
+		if ((start < end) && isspace(*end)) {
 			/* Skip trailing spaces */
-			for (; isspace(*end) && end >= start; end--)
-				;
+			do {
+				end--;
+			} while ((start < end) && isspace(*end));
+
 			end[1] = 0;
 			buf->length = (size_t) (end - start + 1);
 		}
 
 		if (isspace(*start)) {
 			/* Skip leading spaces */
-			for (; isspace(*start) && end >= start; start++)
-				;
+			do {
+				start++;
+			} while (isspace(*start));
+
 			buf->length = (size_t) (end - start + 1);
 			/* Include trailing 0 */
 			memmove(buf->data, start, buf->length + 1);

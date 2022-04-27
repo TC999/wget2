@@ -288,6 +288,18 @@ static void test_buffer(void)
 			}
 		}
 	}
+
+	char expected[] = "";
+	for (int ws = 0; ws <= 2; ws++) {
+		wget_buffer_printf(&buf, "%.*s", ws, "  ");
+		wget_buffer_trim(&buf);
+		if (!strcmp(buf.data, expected))
+			ok++;
+		else {
+			failed++;
+			info_printf("test_buffer_trim: got '%s' (expected '%s') (%d)\n", buf.data, expected, ws);
+		}
+	}
 	wget_buffer_deinit(&buf);
 
 	// force reallocation
