@@ -495,7 +495,7 @@ size_t wget_buffer_bufcat(wget_buffer *buf, wget_buffer *src)
  */
 size_t wget_buffer_memset(wget_buffer *buf, char c, size_t length)
 {
-	if (likely(buf))
+	if (likely(buf) && length)
 		buf->length = 0;
 
 	return wget_buffer_memset_append(buf, c, length);
