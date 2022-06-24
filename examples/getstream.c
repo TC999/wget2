@@ -136,6 +136,18 @@ static char *strcasestr_ascii(const char *haystack, const char *needle)
 	return NULL;
 }
 
+static char *get_stream_url(wget_http_response *resp, const char *link, const char *fmt)
+{
+	char url[128], *p, *stream_url = NULL;
+
+	if ((p = strcasestr_ascii(resp->body->data, link)) && (sscanf(p + strlen(link), fmt, url) == 1)) {
+		stream_url = wget_strdup(url);
+	} else
+		fprintf(stderr, "Failed to parse playlist URL\n");
+
+	return stream_url;
+}
+
 int main(int argc, const char *const *argv)
 {
 	wget_http_response *resp;
@@ -191,31 +203,13 @@ int main(int argc, const char *const *argv)
 
 	} else if (!wget_strcasecmp_ascii(resp->content_type, "audio/x-ms-wax") || !wget_strcasecmp_ascii(resp->content_type, "video/x-ms-asf")) {
 		// .wax/.asx format <ASX VERSION="3.0">
-		char *p, url[128];
-
-		if ((p = strcasestr_ascii(resp->body->data, " HREF=\"")) && sscanf(p + 7, "%127[^\"]", url) == 1) {
-			stream_url = wget_strdup(url);
-		} else
-			fprintf(stderr, "Failed to parse playlist URL\n");
-
+		stream_url = get_stream_url(resp, " HREF=\"", "%127[^\"]");
 	} else if (!wget_strcasecmp_ascii(resp->content_type, "application/pls+xml") || !wget_strcasecmp_ascii(resp->content_type, "audio/x-scpls")) {
 		// .pls
-		char *p, url[128];
-
-		if ((p = strcasestr_ascii(resp->body->data, "File1=")) && sscanf(p + 6, "%127[^\r\n]", url) == 1) {
-			stream_url = wget_strdup(url);
-		} else
-			fprintf(stderr, "Failed to parse playlist URL\n");
-
+		stream_url = get_stream_url(resp, "File1=", "%127[^\r\n]");
 	} else if (!wget_strcasecmp_ascii(resp->content_type, "application/xspf+xml")) {
 		// .xspf
-		char *p, url[128];
-
-		if ((p = strcasestr_ascii(resp->body->data, "<location>")) && sscanf(p + 10, " %127[^< \t\r\n]", url) == 1) {
-			stream_url = wget_strdup(url);
-		} else
-			fprintf(stderr, "Failed to parse playlist URL\n");
-
+		stream_url = get_stream_url(resp, "<location>", " %127[^< \t\r\n]");
 	} else {
 		fprintf(stderr, "Unsupported type of stream: '%s'\n", resp->content_type);
 		return EXIT_FAILURE;
