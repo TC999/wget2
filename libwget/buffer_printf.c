@@ -518,6 +518,7 @@ size_t wget_buffer_vprintf_append(wget_buffer *buf, const char *fmt, va_list arg
 size_t wget_buffer_vprintf(wget_buffer *buf, const char *fmt, va_list args)
 {
 	buf->length = 0;
+	buf->data[0] = 0;
 
 	return wget_buffer_vprintf_append(buf, fmt, args);
 }

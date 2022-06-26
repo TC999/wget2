@@ -390,8 +390,8 @@ size_t wget_buffer_memcat(wget_buffer *buf, const void *data, size_t length)
 		else
 			memset(buf->data + buf->length, 0, length);
 		buf->length += length;
+		buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 	}
-	buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 
 	return buf->length;
 }
@@ -495,7 +495,7 @@ size_t wget_buffer_bufcat(wget_buffer *buf, wget_buffer *src)
  */
 size_t wget_buffer_memset(wget_buffer *buf, char c, size_t length)
 {
-	if (likely(buf))
+	if (likely(buf) && length)
 		buf->length = 0;
 
 	return wget_buffer_memset_append(buf, c, length);
@@ -524,8 +524,8 @@ size_t wget_buffer_memset_append(wget_buffer *buf, char c, size_t length)
 
 		memset(buf->data + buf->length, c, length);
 		buf->length += length;
+		buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 	}
-	buf->data[buf->length] = 0; // always 0 terminate data to allow string functions
 
 	return buf->length;
 }
@@ -548,18 +548,23 @@ char *wget_buffer_trim(wget_buffer *buf)
 		char *start = buf->data;
 		char *end = start + buf->length - 1;
 
-		if (isspace(*end)) {
+		/* Accessing `start - 1` is undefined so leave if `start == end` */
+		if ((start < end) && isspace(*end)) {
 			/* Skip trailing spaces */
-			for (; isspace(*end) && end >= start; end--)
-				;
+			do {
+				end--;
+			} while ((start < end) && isspace(*end));
+
 			end[1] = 0;
 			buf->length = (size_t) (end - start + 1);
 		}
 
 		if (isspace(*start)) {
 			/* Skip leading spaces */
-			for (; isspace(*start) && end >= start; start++)
-				;
+			do {
+				start++;
+			} while (isspace(*start));
+
 			buf->length = (size_t) (end - start + 1);
 			/* Include trailing 0 */
 			memmove(buf->data, start, buf->length + 1);

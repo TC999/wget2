@@ -288,6 +288,18 @@ static void test_buffer(void)
 			}
 		}
 	}
+
+	char expected[] = "";
+	for (int ws = 0; ws <= 2; ws++) {
+		wget_buffer_printf(&buf, "%.*s", ws, "  ");
+		wget_buffer_trim(&buf);
+		if (!strcmp(buf.data, expected))
+			ok++;
+		else {
+			failed++;
+			info_printf("test_buffer_trim: got '%s' (expected '%s') (%d)\n", buf.data, expected, ws);
+		}
+	}
 	wget_buffer_deinit(&buf);
 
 	// force reallocation
@@ -374,9 +386,10 @@ static void test_buffer_printf(void)
 						}
 					}
 
+					memset(string, 0, sizeof(string));
 					for (it = 0; it < sizeof(string); it++) {
-						memset(string, 'a', it);
-						string[it] = 0;
+						if (it > 0)
+							string[it - 1] = 'a';
 
 #if defined __clang__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 						#pragma GCC diagnostic push
@@ -411,9 +424,10 @@ static void test_buffer_printf(void)
 						}
 					}
 
+					memset(string, 0, sizeof(string));
 					for (it = 0; it < sizeof(string); it++) {
-						memset(string, 'a', it);
-						string[it] = 0;
+						if (it > 0)
+							string[it - 1] = 'a';
 
 #if defined __clang__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 						#pragma GCC diagnostic push
