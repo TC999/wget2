@@ -133,6 +133,8 @@ static struct config {
 struct session_context {
 	const char *
 		hostname;
+	char *
+		session_alpn;
 	wget_hpkp_stats_result
 		stats_hpkp;
 	uint16_t
@@ -1639,6 +1641,145 @@ static ssize_t win32_recv(gnutls_transport_ptr_t p, void *buf, size_t size)
 }
 #endif
 
+/* This function will set the session ID on arrival of a NEW_SESSION_TICKET message
+ * from the server for TLS 1.3 connections.
+ */
+static int handshake_callback(gnutls_session_t session, unsigned int htype, unsigned when,
+							  unsigned int incoming, const gnutls_datum_t *msg)
+{
+	int ret = 0;
+	struct session_context *ctx = gnutls_session_get_ptr(session);
+	gnutls_datum_t session_data;
+
+	(void)msg;
+	(void)htype;
+	if (when && incoming && (gnutls_protocol_get_version(session) == GNUTLS_TLS1_3)) {
+		if (config.tls_session_cache) {
+			if ((ret = gnutls_session_get_data2(session, &session_data)) == GNUTLS_E_SUCCESS) {
+				wget_tls_session_db_add(config.tls_session_cache,
+					wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size, ctx->session_alpn)); // 18h valid
+				xfree(session_data.data);
+			} else
+				debug_printf("Failed to get session data: %s", gnutls_strerror(ret));
+		}
+	}
+
+	return ret;
+}
+
+/*
+ * Perform the TLS/SSL handshake
+ */
+static int wget_ssl_handshake(wget_tcp *tcp)
+{
+	int ret = WGET_E_UNKNOWN;
+	gnutls_session_t session = tcp->ssl_session;
+	int rc, sockfd = tcp->sockfd, connect_timeout = tcp->connect_timeout;
+	const char *hostname = tcp->ssl_hostname;
+	struct session_context *ctx = gnutls_session_get_ptr(session);
+	wget_tls_stats_data *tls_stats = tcp->ssl_handshake_data.tls_stats;
+	long long before_millisecs = 0;
+
+	if (tls_stats_callback)
+		before_millisecs = wget_get_timemillis();
+
+	ret = do_handshake(session, sockfd, connect_timeout);
+
+	if (tls_stats_callback) {
+		long long after_millisecs = wget_get_timemillis();
+		tls_stats->tls_secs = after_millisecs - before_millisecs;
+		tls_stats->tls_con = 1;
+#if GNUTLS_VERSION_NUMBER >= 0x030500
+		tls_stats->false_start = (gnutls_session_get_flags(session) & GNUTLS_SFLAGS_FALSE_START) != 0;
+#endif
+	}
+
+	xfree(ctx->session_alpn);
+	ctx->session_alpn = NULL;
+
+#if GNUTLS_VERSION_NUMBER >= 0x030200
+	if (config.alpn) {
+		gnutls_datum_t protocol;
+		if ((rc = gnutls_alpn_get_selected_protocol(session, &protocol))) {
+			debug_printf("GnuTLS: Get ALPN: %s\n", gnutls_strerror(rc));
+			if (!strstr(config.alpn,"http/1.1"))
+				ret = WGET_E_CONNECT;
+		} else {
+			debug_printf("ALPN: Server accepted protocol '%.*s'\n", (int) protocol.size, protocol.data);
+			if (tls_stats_callback)
+				tls_stats->alpn_protocol = wget_strmemdup(protocol.data, protocol.size);
+
+			if (!memcmp(protocol.data, "h2", 2)) {
+				tcp->protocol = WGET_PROTOCOL_HTTP_2_0;
+				if (tls_stats_callback)
+					tls_stats->http_protocol = WGET_PROTOCOL_HTTP_2_0;
+			}
+
+			// Always store the negotiated ALPN protocol in the session file
+			ctx->session_alpn = wget_strmemdup(protocol.data, protocol.size);
+		}
+	}
+#endif
+
+	if (config.print_info)
+		print_info(session);
+
+	if (ret == WGET_E_SUCCESS) {
+		int resumed = gnutls_session_is_resumed(session);
+
+		tcp->ssl_handshake_data.state = WGET_SSL_HANDSHAKE_DONE;
+
+		if (!ctx->session_alpn)
+			ctx->session_alpn = wget_strdup("http/1.1");
+
+		if (tls_stats_callback) {
+			tls_stats->resumed = resumed;
+			tls_stats->version = gnutls_protocol_get_version(session);
+			gnutls_certificate_get_peers(session, (unsigned int *)&(tls_stats->cert_chain_size));
+		}
+
+		debug_printf("Handshake completed%s\n", resumed ? " (resumed session)" : "");
+
+		// We only have a session ID now on TLS 1.2 or lower; for TLS 1.3,
+		// we get it via the NEW_SESSION_TICKET message that arrives later.
+		if ((gnutls_protocol_get_version(session) < GNUTLS_TLS1_3) && !resumed && config.tls_session_cache) {
+			if (tcp->tls_false_start) {
+				ctx->delayed_session_data = 1;
+			} else {
+				gnutls_datum_t session_data;
+
+				if ((rc = gnutls_session_get_data2(session, &session_data)) == GNUTLS_E_SUCCESS) {
+					wget_tls_session_db_add(config.tls_session_cache,
+						wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size, ctx->session_alpn)); // 18h valid
+					xfree(session_data.data);
+				} else
+					debug_printf("Failed to get session data: %s", gnutls_strerror(rc));
+			}
+		}
+	}
+
+	if (tls_stats_callback) {
+		tls_stats->hostname = hostname;
+		tls_stats_callback(tls_stats, tls_stats_ctx);
+		xfree(tls_stats->alpn_protocol);
+		xfree(tls_stats);
+	}
+
+	tcp->hpkp = ctx->stats_hpkp;
+
+	if (ret != WGET_E_SUCCESS) {
+		if (ret == WGET_E_TIMEOUT)
+			debug_printf("Handshake timed out\n");
+		xfree(ctx->hostname);
+		xfree(ctx->session_alpn);
+		xfree(ctx);
+		gnutls_deinit(session);
+		tcp->ssl_session = NULL;
+	}
+
+	return ret;
+}
+
 /**
  * \param[in] tcp A TCP connection (see wget_tcp_init())
  * \return `WGET_E_SUCCESS` on success or an error code (`WGET_E_*`) on failure
@@ -1656,20 +1797,12 @@ static ssize_t win32_recv(gnutls_transport_ptr_t p, void *buf, size_t size)
 int wget_ssl_open(wget_tcp *tcp)
 {
 	gnutls_session_t session;
-	wget_tls_stats_data stats = {
-			.alpn_protocol = NULL,
-			.version = -1,
-			.false_start = -1,
-			.tfo = -1,
-			.resumed = 0,
-			.http_protocol = WGET_PROTOCOL_HTTP_1_1,
-			.cert_chain_size = 0
-	};
+	wget_tls_stats_data *tls_stats = NULL;
+	struct wget_ssl_handshake_data *handshake_data = &tcp->ssl_handshake_data;
 
-	int ret = WGET_E_UNKNOWN;
-	int rc, sockfd, connect_timeout;
+	int rc, sockfd;
 	const char *hostname;
-	long long before_millisecs = 0;
+	char *session_alpn;
 
 	if (!tcp)
 		return WGET_E_INVALID;
@@ -1681,9 +1814,30 @@ int wget_ssl_open(wget_tcp *tcp)
 	if (!init)
 		wget_ssl_init();
 
+	*handshake_data = (struct wget_ssl_handshake_data) {
+		.state = WGET_SSL_HANDSHAKE_NONE,
+		.tls_stats = NULL,
+		.max_early_data = 0
+	};
+
+	if (tls_stats_callback) {
+		tls_stats = wget_calloc(1, sizeof(wget_tls_stats_data));
+		if (!tls_stats)
+			return WGET_E_MEMORY;
+
+		*tls_stats = (wget_tls_stats_data) {
+			.alpn_protocol = NULL,
+			.version = -1,
+			.false_start = -1,
+			.tfo = -1,
+			.resumed = 0,
+			.http_protocol = WGET_PROTOCOL_HTTP_1_1,
+			.cert_chain_size = 0
+		};
+	}
+
 	hostname = tcp->ssl_hostname;
 	sockfd= tcp->sockfd;
-	connect_timeout = tcp->connect_timeout;
 
 	unsigned int flags = GNUTLS_CLIENT;
 
@@ -1728,6 +1882,8 @@ int wget_ssl_open(wget_tcp *tcp)
 	}
 	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, credentials);
 
+	gnutls_handshake_set_hook_function(session, GNUTLS_HANDSHAKE_NEW_SESSION_TICKET, GNUTLS_HOOK_POST, handshake_callback);
+
 	ctx->hostname = wget_strdup(hostname);
 	ctx->port = tcp->remote_port;
 
@@ -1752,19 +1908,58 @@ int wget_ssl_open(wget_tcp *tcp)
 		error_printf(_("WARNING: OCSP is not available in this version of GnuTLS.\n"));
 #endif
 
+	session_alpn = ctx->session_alpn;
+
+	{
+		void *data;
+		size_t size;
+
+		if (wget_tls_session_get(config.tls_session_cache, ctx->hostname, &data, &size, &session_alpn) == 0) {
+			debug_printf("found cached session data for %s\n", ctx->hostname);
+			if ((rc = gnutls_session_set_data(session, data, size + 1)) != GNUTLS_E_SUCCESS)
+				error_printf(_("GnuTLS: Failed to set session data: %s\n"), gnutls_strerror(rc));
+			xfree(data);
+		}
+	}
+
+	if ((gnutls_protocol_get_version(session) < GNUTLS_TLS1_3) || tcp->tcp_fastopen) {
+		tcp->tls_early_data = false;
+	} else if (tcp->tls_early_data) {
+		size_t max_early_data  = gnutls_record_get_max_early_data_size(session);
+
+		if (!max_early_data || max_early_data == 0xFFFFFFFFUL) {
+			debug_printf("TLS session does not allow early data\n");
+			tcp->tls_early_data = false;
+		} else
+			debug_printf("Server allows upto %zu bytes of early data\n", max_early_data);
+
+		handshake_data->max_early_data = max_early_data;
+	}
+
 #if GNUTLS_VERSION_NUMBER >= 0x030200
 	if (config.alpn) {
 		unsigned nprot;
-		const char *e, *s;
+		const char *e, *s, *alpn = config.alpn;
 
-		for (nprot = 0, s = e = config.alpn; *e; s = e + 1)
+		// Only negotiate the ALPN protocol of the previous session
+		// while sending early data; if this ALPN protocol is not
+		// among the requested ones, then disable early data
+		if (tcp->tls_early_data && session_alpn && strstr(config.alpn, session_alpn)) {
+			alpn = session_alpn;
+
+			if (!strcmp(alpn, "h2"))
+				tcp->protocol = WGET_PROTOCOL_HTTP_2_0;
+		} else
+			tcp->tls_early_data = false;
+
+		for (nprot = 0, s = e = alpn; *e; s = e + 1)
 			if ((e = strchrnul(s, ',')) != s)
 				nprot++;
 
 		if (nprot) {
 			gnutls_datum_t data[16];
 
-			for (nprot = 0, s = e = config.alpn; *e && nprot < countof(data); s = e + 1) {
+			for (nprot = 0, s = e = alpn; *e && nprot < countof(data); s = e + 1) {
 				if ((e = strchrnul(s, ',')) != s) {
 					data[nprot].data = (unsigned char *) s;
 					data[nprot].size = (unsigned) (e - s);
@@ -1779,13 +1974,18 @@ int wget_ssl_open(wget_tcp *tcp)
 	}
 #endif
 
+	if (tcp->tls_early_data && !config.alpn && session_alpn) {
+		if (strcmp(session_alpn, "http/1.1"))
+			tcp->tls_early_data = false;
+	}
+
 	tcp->ssl_session = session;
 	gnutls_session_set_ptr(session, ctx);
 
 #ifdef MSG_FASTOPEN
 	if ((rc = wget_tcp_get_tcp_fastopen(tcp))) {
 		if (tls_stats_callback)
-			stats.tfo = (char)rc;
+			tls_stats->tfo = (char)rc;
 
 		// prepare for TCP FASTOPEN... sendmsg() instead of connect/write on first write
 		gnutls_transport_set_vec_push_function(session, (ssize_t (*)(gnutls_transport_ptr_t, const giovec_t *iov, int iovcnt)) ssl_writev);
@@ -1809,101 +2009,13 @@ int wget_ssl_open(wget_tcp *tcp)
 	}
 #endif
 
-	{
-		void *data;
-		size_t size;
+	handshake_data->tls_stats = tls_stats;
 
-		if (wget_tls_session_get(config.tls_session_cache, ctx->hostname, &data, &size) == 0) {
-			debug_printf("found cached session data for %s\n", ctx->hostname);
-			if ((rc = gnutls_session_set_data(session, data, size)) != GNUTLS_E_SUCCESS)
-				error_printf(_("GnuTLS: Failed to set session data: %s\n"), gnutls_strerror(rc));
-			xfree(data);
-		}
-	}
-
-	if (tls_stats_callback)
-		before_millisecs = wget_get_timemillis();
-
-	ret = do_handshake(session, sockfd, connect_timeout);
-
-	if (tls_stats_callback) {
-		long long after_millisecs = wget_get_timemillis();
-		stats.tls_secs = after_millisecs - before_millisecs;
-		stats.tls_con = 1;
-#if GNUTLS_VERSION_NUMBER >= 0x030500
-		stats.false_start = (gnutls_session_get_flags(session) & GNUTLS_SFLAGS_FALSE_START) != 0;
-#endif
-	}
-
-#if GNUTLS_VERSION_NUMBER >= 0x030200
-	if (config.alpn) {
-		gnutls_datum_t protocol;
-		if ((rc = gnutls_alpn_get_selected_protocol(session, &protocol))) {
-			debug_printf("GnuTLS: Get ALPN: %s\n", gnutls_strerror(rc));
-			if (!strstr(config.alpn,"http/1.1"))
-				ret = WGET_E_CONNECT;
-		} else {
-			debug_printf("ALPN: Server accepted protocol '%.*s'\n", (int) protocol.size, protocol.data);
-			if (tls_stats_callback)
-				stats.alpn_protocol = wget_strmemdup(protocol.data, protocol.size);
-
-			if (!memcmp(protocol.data, "h2", 2)) {
-				tcp->protocol = WGET_PROTOCOL_HTTP_2_0;
-				if (tls_stats_callback)
-					stats.http_protocol = WGET_PROTOCOL_HTTP_2_0;
-			}
-		}
-	}
-#endif
-
-	if (config.print_info)
-		print_info(session);
-
-	if (ret == WGET_E_SUCCESS) {
-		int resumed = gnutls_session_is_resumed(session);
-
-		if (tls_stats_callback) {
-			stats.resumed = resumed;
-			stats.version = gnutls_protocol_get_version(session);
-			gnutls_certificate_get_peers(session, (unsigned int *)&(stats.cert_chain_size));
-		}
-
-		debug_printf("Handshake completed%s\n", resumed ? " (resumed session)" : "");
-
-		if (!resumed && config.tls_session_cache) {
-			if (tcp->tls_false_start) {
-				ctx->delayed_session_data = 1;
-			} else {
-				gnutls_datum_t session_data;
-
-				if ((rc = gnutls_session_get_data2(session, &session_data)) == GNUTLS_E_SUCCESS) {
-					wget_tls_session_db_add(config.tls_session_cache,
-						wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size)); // 18h valid
-					xfree(session_data.data);
-				} else
-					debug_printf("Failed to get session data: %s", gnutls_strerror(rc));
-			}
-		}
-	}
-
-	if (tls_stats_callback) {
-		stats.hostname = hostname;
-		tls_stats_callback(&stats, tls_stats_ctx);
-		xfree(stats.alpn_protocol);
-	}
-
-	tcp->hpkp = ctx->stats_hpkp;
-
-	if (ret != WGET_E_SUCCESS) {
-		if (ret == WGET_E_TIMEOUT)
-			debug_printf("Handshake timed out\n");
-		xfree(ctx->hostname);
-		xfree(ctx);
-		gnutls_deinit(session);
-		tcp->ssl_session = NULL;
-	}
-
-	return ret;
+	if (tcp->tls_early_data && session_alpn && handshake_data->state == WGET_SSL_HANDSHAKE_NONE) {
+		handshake_data->state = WGET_SSL_HANDSHAKE_PENDING; // hold off the handshake till early data is sent
+		return WGET_E_SUCCESS;
+	} else
+		return wget_ssl_handshake(tcp);
 }
 
 /**
@@ -1932,6 +2044,7 @@ void wget_ssl_close(void **session)
 		*session = NULL;
 
 		xfree(ctx->hostname);
+		xfree(ctx->session_alpn);
 		xfree(ctx);
 	}
 }
@@ -2011,7 +2124,7 @@ ssize_t wget_ssl_read_timeout(void *session, char *buf, size_t count, int timeou
 				debug_printf("Got delayed session data\n");
 				ctx->delayed_session_data = 0;
 				wget_tls_session_db_add(config.tls_session_cache,
-					wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size)); // 18h valid
+					wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size, ctx->session_alpn)); // 18h valid
 				xfree(session_data.data);
 			} else
 				debug_printf("No delayed session data%s\n", gnutls_strerror(rc));
@@ -2050,8 +2163,12 @@ ssize_t wget_ssl_read_timeout(void *session, char *buf, size_t count, int timeou
  * If a rehandshake is needed, this function does it automatically and tries
  * to write again.
  */
-ssize_t wget_ssl_write_timeout(void *session, const char *buf, size_t count, int timeout)
+ssize_t wget_ssl_write_timeout(wget_tcp *tcp, const char *buf, size_t count)
 {
+	void *session = tcp->ssl_session;
+	struct wget_ssl_handshake_data *handshake_data = &tcp->ssl_handshake_data;
+	int timeout = tcp->timeout;
+
 #ifdef HAVE_GNUTLS_TRANSPORT_GET_INT
 	// since GnuTLS 3.1.9, avoid warnings about illegal pointer conversion
 	int sockfd = gnutls_transport_get_int(session);
@@ -2059,10 +2176,50 @@ ssize_t wget_ssl_write_timeout(void *session, const char *buf, size_t count, int
 	int sockfd = (int)(ptrdiff_t)gnutls_transport_get_ptr(session);
 #endif
 
-	for (;;) {
-		ssize_t nbytes;
-		int rc;
+	size_t early_data_count = 0;
+	ssize_t nbytes;
+	int rc;
 
+	if (handshake_data->state == WGET_SSL_HANDSHAKE_PENDING) {
+		if ((rc = wget_ready_2_write(sockfd, timeout)) <= 0)
+			return rc;
+
+		early_data_count = count > handshake_data->max_early_data ? handshake_data->max_early_data : count;
+		nbytes = gnutls_record_send_early_data(session, buf, early_data_count);
+
+		if (nbytes == GNUTLS_E_AGAIN) {
+			return 0; // indicate timeout
+		} else if (nbytes < 0) {
+			error_printf(_("GnuTLS send_early_data: %s\n"), gnutls_strerror((int)nbytes));
+			return -1;
+		} else {
+			// GnuTLS bug: it returns zero instead of the number of bytes
+			// if the entire buffer was written
+			if (nbytes)
+				early_data_count = nbytes;
+
+			// Sent early all the early data we could; complete the handshake
+			rc = wget_ssl_handshake(tcp);
+		}
+
+		if (rc == WGET_E_SUCCESS) {
+			if (gnutls_session_get_flags(session) & GNUTLS_SFLAGS_EARLY_DATA) {
+				debug_printf("Server accepted %zu bytes of early data\n", early_data_count);
+			} else {
+				debug_printf("Server rejected early data\n");
+				early_data_count = 0; // re-send everything normally
+			}
+		} else
+			return -1;
+	}
+
+	// If we could not send everything as early data, send the remaining data normally
+	if (early_data_count == count)
+		return count;
+	else
+		count -= early_data_count;
+
+	for (;;) {
 		if ((rc = wget_ready_2_write(sockfd, timeout)) <= 0)
 			return rc;
 

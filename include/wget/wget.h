@@ -1569,9 +1569,9 @@ WGETAPI void
 WGETAPI void
 	wget_tls_session_free(wget_tls_session *tls_session);
 WGETAPI wget_tls_session * NULLABLE
-	wget_tls_session_new(const char *host, int64_t maxage, const void *data, size_t data_size);
+	wget_tls_session_new(const char *host, int64_t maxage, const void *data, size_t data_size, const char *alpn);
 WGETAPI int
-	wget_tls_session_get(const wget_tls_session_db *tls_session_db, const char *host, void **data, size_t *size);
+	wget_tls_session_get(const wget_tls_session_db *tls_session_db, const char *host, void **data, size_t *size, char **alpn);
 WGETAPI wget_tls_session_db * NULLABLE
 	wget_tls_session_db_init(wget_tls_session_db *tls_session_db);
 WGETAPI void
@@ -1918,6 +1918,8 @@ WGETAPI void
 WGETAPI void
 	wget_tcp_set_tls_false_start(wget_tcp *tcp, bool false_start);
 WGETAPI void
+	wget_tcp_set_tls_early_data(wget_tcp *tcp, bool early_data);
+WGETAPI void
 	wget_tcp_set_ssl(wget_tcp *tcp, bool ssl);
 WGETAPI bool
 	wget_tcp_get_ssl(wget_tcp *tcp) WGET_GCC_PURE;
@@ -1935,6 +1937,8 @@ WGETAPI bool
 	wget_tcp_get_tcp_fastopen(wget_tcp *tcp) WGET_GCC_PURE;
 WGETAPI bool
 	wget_tcp_get_tls_false_start(wget_tcp *tcp) WGET_GCC_PURE;
+WGETAPI bool
+	wget_tcp_get_tls_early_data(wget_tcp *tcp) WGET_GCC_PURE;
 WGETAPI int
 	wget_tcp_get_family(wget_tcp *tcp) WGET_GCC_PURE;
 WGETAPI int
@@ -2025,7 +2029,7 @@ WGETAPI void
 WGETAPI ssize_t
 	wget_ssl_read_timeout(void *session, char *buf, size_t count, int timeout) WGET_GCC_NONNULL_ALL;
 WGETAPI ssize_t
-	wget_ssl_write_timeout(void *session, const char *buf, size_t count, int timeout) WGET_GCC_NONNULL_ALL;
+	wget_ssl_write_timeout(wget_tcp *tcp, const char *buf, size_t count) WGET_GCC_NONNULL_ALL;
 WGETAPI const char *
 	wget_ssl_default_cert_dir(void);
 WGETAPI const char *
