@@ -1644,15 +1644,13 @@ static ssize_t win32_recv(gnutls_transport_ptr_t p, void *buf, size_t size)
 /* This function will set the session ID on arrival of a NEW_SESSION_TICKET message
  * from the server for TLS 1.3 connections.
  */
-static int handshake_callback(gnutls_session_t session, unsigned int htype, unsigned when,
-							  unsigned int incoming, const gnutls_datum_t *msg)
+static int handshake_callback(gnutls_session_t session, unsigned int htype WGET_GCC_UNUSED, unsigned when,
+							  unsigned int incoming, const gnutls_datum_t *msg WGET_GCC_UNUSED)
 {
 	int ret = 0;
 	struct session_context *ctx = gnutls_session_get_ptr(session);
 	gnutls_datum_t session_data;
 
-	(void)msg;
-	(void)htype;
 	if (when && incoming && (gnutls_protocol_get_version(session) == GNUTLS_TLS1_3)) {
 		if (config.tls_session_cache) {
 			if ((ret = gnutls_session_get_data2(session, &session_data)) == GNUTLS_E_SUCCESS) {
@@ -1702,7 +1700,15 @@ static int wget_ssl_handshake(wget_tcp *tcp)
 		gnutls_datum_t protocol;
 		if ((rc = gnutls_alpn_get_selected_protocol(session, &protocol))) {
 			debug_printf("GnuTLS: Get ALPN: %s\n", gnutls_strerror(rc));
-			if (!strstr(config.alpn,"http/1.1"))
+			protocol.data = NULL;
+			protocol.size = 0;
+
+      // The server did not confirm the requested ALPN protocol;
+      // try defaulting to http/1.1 otherwise fail the connection
+			if (tcp->tls_early_data && ctx->session_alpn) {
+				if (strcmp(ctx->session_alpn, "http/1.1"))
+					ret = WGET_E_CONNECT;
+			} else if (!strstr(config.alpn, "http/1.1"))
 				ret = WGET_E_CONNECT;
 		} else {
 			debug_printf("ALPN: Server accepted protocol '%.*s'\n", (int) protocol.size, protocol.data);
@@ -1714,10 +1720,10 @@ static int wget_ssl_handshake(wget_tcp *tcp)
 				if (tls_stats_callback)
 					tls_stats->http_protocol = WGET_PROTOCOL_HTTP_2_0;
 			}
-
-			// Always store the negotiated ALPN protocol in the session file
-			ctx->session_alpn = wget_strmemdup(protocol.data, protocol.size);
 		}
+		// Store this selected ALPN protocol
+		xfree(ctx->session_alpn);
+		ctx->session_alpn = wget_strmemdup(protocol.data, protocol.size);
 	}
 #endif
 
@@ -1922,6 +1928,7 @@ int wget_ssl_open(wget_tcp *tcp)
 		}
 	}
 
+#if GNUTLS_VERSION_NUMBER >= 0x030605
 	if ((gnutls_protocol_get_version(session) < GNUTLS_TLS1_3) || tcp->tcp_fastopen) {
 		tcp->tls_early_data = false;
 	} else if (tcp->tls_early_data) {
@@ -1935,6 +1942,12 @@ int wget_ssl_open(wget_tcp *tcp)
 
 		handshake_data->max_early_data = max_early_data;
 	}
+#else
+	if (tcp->tls_early_data) {
+		error_printf(_("TLS Early Data requested but libwget built with insufficient GnuTLS version\n"));
+		tcp->tls_early_data = false;
+	}
+#endif
 
 #if GNUTLS_VERSION_NUMBER >= 0x030200
 	if (config.alpn) {
@@ -2176,9 +2189,10 @@ ssize_t wget_ssl_write_timeout(wget_tcp *tcp, const char *buf, size_t count)
 	int sockfd = (int)(ptrdiff_t)gnutls_transport_get_ptr(session);
 #endif
 
-	size_t early_data_count = 0;
 	ssize_t nbytes;
 	int rc;
+#if GNUTLS_VERSION_NUMBER >= 0x030605
+	size_t early_data_count = 0;
 
 	if (handshake_data->state == WGET_SSL_HANDSHAKE_PENDING) {
 		if ((rc = wget_ready_2_write(sockfd, timeout)) <= 0)
@@ -2218,6 +2232,7 @@ ssize_t wget_ssl_write_timeout(wget_tcp *tcp, const char *buf, size_t count)
 		return count;
 	else
 		count -= early_data_count;
+#endif
 
 	for (;;) {
 		if ((rc = wget_ready_2_write(sockfd, timeout)) <= 0)
