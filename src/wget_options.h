@@ -215,6 +215,7 @@ struct config {
 		download_attr;
 	bool
 		tls_resume,            // if TLS session resumption is enabled or not
+		tls_early_data,        // if 0-RTT data is enabled for TLS1.3 connections
 		content_on_error,
 		fsync_policy,
 		netrc,

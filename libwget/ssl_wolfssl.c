@@ -1043,7 +1043,7 @@ int wget_ssl_open(wget_tcp *tcp)
 				char session_data_data[session_data_size];
 				if (wolfSSL_memsave_session_cache(session_data_data, session_data_size) == SSL_SUCCESS) {
 					wget_tls_session_db_add(config.tls_session_cache,
-						wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size)); // 18h valid
+						wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size, NULL)); // 18h valid
 				}
 			}
 */
@@ -1051,7 +1051,7 @@ int wget_ssl_open(wget_tcp *tcp)
 
 			if ((rc = gnutls_session_get_data2(session, &session_data)) == GNUTLS_E_SUCCESS) {
 				wget_tls_session_db_add(config.tls_session_cache,
-					wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size)); // 18h valid
+					wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size, NULL)); // 18h valid
 				gnutls_free(session_data.data);
 			} else
 				debug_printf("Failed to get session data: %s", gnutls_strerror(rc));
@@ -1171,7 +1171,7 @@ ssize_t wget_ssl_read_timeout(void *session, char *buf, size_t count, int timeou
 				debug_printf("Got delayed session data\n");
 				ctx->delayed_session_data = 0;
 				wget_tls_session_db_add(config.tls_session_cache,
-					wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size)); // 18h valid
+					wget_tls_session_new(ctx->hostname, 18 * 3600, session_data.data, session_data.size, NULL)); // 18h valid
 				gnutls_free(session_data.data);
 			} else
 				debug_printf("No delayed session data%s\n", gnutls_strerror(rc));
@@ -1210,8 +1210,10 @@ ssize_t wget_ssl_read_timeout(void *session, char *buf, size_t count, int timeou
  * If a rehandshake is needed, this function does it automatically and tries
  * to write again.
  */
-ssize_t wget_ssl_write_timeout(void *session, const char *buf, size_t count, int timeout)
+ssize_t wget_ssl_write_timeout(wget_tcp *tcp, const char *buf, size_t count)
 {
+	void *session = tcp->ssl_session;
+	int timeout = tcp->timeout;
 	int sockfd = SOCKET_TO_FD(wolfSSL_get_fd(session));
 	int rc;
 

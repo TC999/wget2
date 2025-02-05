@@ -2255,7 +2255,7 @@ static const struct optionw options[] = {
 	},
 	{ "secure-protocol", &config.secure_protocol, parse_string, 1, 0,
 		SECTION_SSL,
-		{ "Set protocol to be used (auto, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLS1_3, PFS).\n",
+		{ "Set protocol to be used (auto, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLSv1_3, PFS).\n",
 		  "(default: auto). Or use GnuTLS priority\n",
 		  "strings, e.g. NORMAL:-VERS-SSL3.0:-RSA\n"
 		}
@@ -2348,6 +2348,12 @@ static const struct optionw options[] = {
 	{ "timestamping", &config.timestamping, parse_bool, -1, 'N',
 		SECTION_DOWNLOAD,
 		{ "Just retrieve younger files than the local ones.\n",
+		  "(default: off)\n"
+		}
+	},
+	{ "tls-early-data", &config.tls_early_data, parse_bool, -1, 0,
+		SECTION_SSL,
+		{ "Enable TLS 1.3 Early Data (needs GnuTLS 3.6.5+).\n"
 		  "(default: off)\n"
 		}
 	},
@@ -3582,6 +3588,9 @@ int init(int argc, const char **argv)
 	}
 #endif
 
+	if (!config.tls_resume)
+		config.tls_early_data = false;
+
 	if (config.base_url)
 		config.base = wget_iri_parse(config.base_url, config.local_encoding);
 
@@ -3754,6 +3763,7 @@ int init(int argc, const char **argv)
 	wget_tcp_set_connect_timeout(NULL, config.connect_timeout);
 	wget_tcp_set_tcp_fastopen(NULL, config.tcp_fastopen);
 	wget_tcp_set_tls_false_start(NULL, config.tls_false_start);
+	wget_tcp_set_tls_early_data(NULL, config.tls_early_data);
 	if (!config.dont_write) // fuzzing mode, try to avoid real network access
 		wget_tcp_set_bind_address(NULL, config.bind_address);
 	if (config.bind_interface)

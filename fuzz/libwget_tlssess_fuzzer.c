@@ -61,7 +61,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 #if ! defined _WIN32 && defined HAVE_FMEMOPEN
 	wget_tls_session_db_load(tlssess_db, "tls");
 #endif
-	if (wget_tls_session_get(tlssess_db, "x.y", &p, &len) == 0)
+	if (wget_tls_session_get(tlssess_db, "x.y", &p, &len, NULL) == 0)
 		wget_free(p);
 	wget_tls_session_db_free(&tlssess_db);
 

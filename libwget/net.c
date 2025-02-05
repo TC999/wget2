@@ -237,6 +237,32 @@ bool wget_tcp_get_tcp_fastopen(wget_tcp *tcp)
 
 /**
  * \param[in] tcp A `wget_tcp` structure representing a TCP connection, returned by wget_tcp_init(). Might be NULL.
+ * \param[in] tls_early_data 1 or 0, whether to enable or disable TLS Early Data.
+ *
+ * Enable or disable TLS Early Data ([RFC 8446](https://datatracker.ietf.org/doc/html/rfc8446)).
+ *
+ * If \p tcp is NULL, TLS Early Data is enabled or disabled globally.
+ */
+void wget_tcp_set_tls_early_data(wget_tcp *tcp, bool tls_early_data)
+{
+	(tcp ? tcp : &global_tcp)->tls_early_data = tls_early_data;
+}
+
+/**
+ * \param[in] tcp A `wget_tcp` structure representing a TCP connection, returned by wget_tcp_init(). Might be NULL.
+ * \return 1 if TLS Early Data is enabled, 0 otherwise.
+ *
+ * Tells whether TLS Early Data is enabled or not.
+ *
+ * You can enable and disable it with wget_tcp_set_tls_early_data().
+ */
+bool wget_tcp_get_tls_early_data(wget_tcp *tcp)
+{
+	return (tcp ? tcp : &global_tcp)->tls_early_data;
+}
+
+/**
+ * \param[in] tcp A `wget_tcp` structure representing a TCP connection, returned by wget_tcp_init(). Might be NULL.
  * \param[in] false_start 1 or 0, whether to enable or disable TLS False Start.
  *
  * Enable or disable TLS False Start ([RFC 7918](https://tools.ietf.org/html/rfc7413)).
@@ -955,7 +981,7 @@ ssize_t wget_tcp_write(wget_tcp *tcp, const char *buf, size_t count)
 		return -1;
 
 	if (tcp->ssl_session)
-		return wget_ssl_write_timeout(tcp->ssl_session, buf, count, tcp->timeout);
+		return wget_ssl_write_timeout(tcp, buf, count);
 
 	while (count) {
 		ssize_t n;

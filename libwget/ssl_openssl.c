@@ -1394,7 +1394,7 @@ static int ssl_resume_session(SSL *ssl, const char *hostname)
 
 	if (wget_tls_session_get(config.tls_session_cache,
 			hostname,
-			&sess, &sesslen) == 0
+			&sess, &sesslen, NULL) == 0
 		&& sess)
 	{
 		debug_printf("Found cached session data for host '%s'\n",hostname);
@@ -1435,7 +1435,7 @@ static int ssl_save_session(const SSL *ssl, const char *hostname)
 		wget_tls_session_db_add(config.tls_session_cache,
 			wget_tls_session_new(hostname,
 				18 * 3600, /* session valid for 18 hours */
-				sess, sesslen));
+				sess, sesslen, NULL));
 		OPENSSL_free(sess);
 		return 1;
 	}
@@ -1897,11 +1897,10 @@ ssize_t wget_ssl_read_timeout(void *session,
  * If a rehandshake is needed, this function does it automatically and tries
  * to write again.
  */
-ssize_t wget_ssl_write_timeout(void *session,
-	const char *buf, size_t count,
-	int timeout)
+ssize_t wget_ssl_write_timeout(wget_tcp *tcp,
+	const char *buf, size_t count)
 {
-	int retval = ssl_transfer(WGET_IO_WRITABLE, session, timeout, (void *) buf, (int) count);
+	int retval = ssl_transfer(WGET_IO_WRITABLE, tcp->ssl_session, tcp->timeout, (void *) buf, (int) count);
 
 	if (retval == WGET_E_HANDSHAKE) {
 		error_printf(_("TLS write error: %s\n"),

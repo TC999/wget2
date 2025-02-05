@@ -32,6 +32,21 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+enum wget_ssl_handshake_state {
+	WGET_SSL_HANDSHAKE_NONE = 0,
+	WGET_SSL_HANDSHAKE_PENDING = 1,
+	WGET_SSL_HANDSHAKE_DONE = 2
+};
+
+struct wget_ssl_handshake_data {
+	enum wget_ssl_handshake_state
+		state;
+	wget_tls_stats_data *
+		tls_stats;
+	size_t
+		max_early_data;
+};
+
 struct wget_tcp_st {
 	void *
 		ssl_session;
@@ -41,6 +56,8 @@ struct wget_tcp_st {
 		bind_addrinfo;
 	struct addrinfo *
 		connect_addrinfo; // needed for TCP_FASTOPEN delayed connect
+	struct wget_ssl_handshake_data
+		ssl_handshake_data;
 	const char
 		*host,
 		*ssl_hostname, // if set, do SSL hostname checking
@@ -66,7 +83,8 @@ struct wget_tcp_st {
 		ssl : 1,
 		tls_false_start : 1,
 		tcp_fastopen : 1, // do we use TCP_FASTOPEN or not
-		first_send : 1; // TCP_FASTOPEN's first packet is sent different
+		first_send : 1, // TCP_FASTOPEN's first packet is sent different
+		tls_early_data : 1;
 };
 
 #endif /* LIBWGET_NET_H */
