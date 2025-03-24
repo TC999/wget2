@@ -141,6 +141,16 @@ Go to background immediately after startup. If no output file is specified via t
 
   Turn off Wget2's output.
 
+  Note that if the connection is fast, some output might be flushed
+  with the refresh of the progressbar, such as the HTTP code and redirection
+  location. As a result, it might seem that Wget2 doesn't give much
+  information like Wget1 does. However, those information are actually
+  printed, only flushed by later progressbar refresh.
+
+  It is possible to keep those output from being flushed by the progressbar
+  by redirection. For example, with a pipe to pagers,
+  like `wget2 ... | less`.
+
 ### `-v`, `--verbose`
 
   Turn on verbose output, with all the available data. The default output is verbose.
