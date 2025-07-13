@@ -652,6 +652,41 @@ AS_IF([(test "$with_gnutls" != "yes" || test "$with_gnutls_hash" != "yes") && te
   ])
 ])
 
+AC_ARG_WITH(quic, AS_HELP_STRING([--with-quic], [Use QUIC with specified library. Options: 'libngtcp2']), with_ngtcp2=$withval, with_libngtcp2="no")
+AS_IF([test "$with_libngtcp2" != "no" && (test "$with_ssl" = "gnutls" || test "$with_ssl" = "yes")],[
+  PKG_CHECK_MODULES([LIBNGTCP2], libngtcp2, [
+    with_libngtcp2="yes"
+    LIBS="$LIBNGTCP2_LIBS $LIBS"
+    CFLAGS="$LIBNGTCP2_CFLAGS $CFLAGS"
+    AC_DEFINE([WITH_LIBNGTCP2], [1], [QUIC support enabled via libngtcp2])
+  ],[
+    OLD_LIBS="$LIBS"
+    LIBS=
+    AC_SEARCH_LIBS(ngtcp2_conn_write_pkt, ngtcp2,
+      [with_libngtcp2=yes; AC_DEFINE([WITH_LIBNGTCP2], [1], [QUIC support enabled via libngtcp2])],
+      [with_libngtcp2=no;  AC_MSG_WARN(*** libngtcp2 was not found. QUIC support disabled.)])
+    LIBNGTCP2_LIBS="$LIBS"
+    LIBS="$LIBS $OLD_LIBS"
+  ])
+])
+
+
+
+AS_IF([test "$with_libngtcp2" != "no" && (test "$with_ssl" = "gnutls" || test "$with_ssl" = "yes")], [
+  PKG_CHECK_MODULES([LIBNGTCP2_CRYPTO_GNUTLS], [libngtcp2_crypto_gnutls], [
+      LIBS="$LIBNGTCP2_CRYPTO_GNUTLS_LIBS $LIBS"
+      CFLAGS="$LIBNGTCP2_CRYPTO_GNUTLS_CFLAGS $CFLAGS"
+      AC_DEFINE([WITH_QUIC_CRYPTO_GNUTLS], [1], [Enable QUIC with GnuTLS support])
+  ])
+], [
+  AS_IF([test "$with_libngtcp2" != "no" && test "$with_ssl" != "gnutls"], [
+    AC_MSG_WARN(*** QUIC can only be enabled with GnuTLS. QUIC support disabled.)
+    with_libngtcp2=no
+  ], [])
+])
+
+AM_CONDITIONAL([WITH_LIBNGTCP2], [test "$with_libngtcp2" = "yes"])
+
 AM_CONDITIONAL([WITH_LIBNETTLE], [test "$with_libnettle" = "yes"])
 AM_CONDITIONAL([WITH_CRYPT], [test "$with_gcrypt" = "yes"])
 
@@ -732,6 +767,29 @@ AS_IF([test "$with_libnghttp2" != "no"], [
   ])
 ])
 AM_CONDITIONAL([WITH_LIBNGHTTP2], [test "$with_libnghttp2" = "yes"])
+
+AC_ARG_WITH(libnghttp3, AS_HELP_STRING([--with-libnghttp3], [enable support for libnghttp3]), with_libnghttp3=$withval, with_libnghttp3=no)
+AS_IF([test "$with_libnghttp3" != "no" && test "$with_libngtcp2" != "yes"], [
+  AC_MSG_WARN(HTTP/3 support requires QUIC. HTTP/3 support disabled.)
+  with_libnghttp3=no
+], [])
+AS_IF([test "$with_libnghttp3" != "no"], [
+  PKG_CHECK_MODULES([LIBNGHTTP3], libnghttp3, [
+    with_libnghttp3=yes
+    LIBS="$LIBNGHTTP3_LIBS $LIBS"
+    CFLAGS="$LIBNGHTTP3_CFLAGS $CFLAGS"
+    AC_DEFINE([WITH_LIBNGHTTP3], [1], [HTTP/3 support enabled via libnghttp3])
+  ], [
+    OLD_LIBS="$LIBS"
+    LIBS=
+    AC_SEARCH_LIBS(nghttp3_conn_client_new, nghttp3,
+      [with_libnghttp3=yes; AC_DEFINE([WITH_LIBNGHTTP3], [1], [HTTP/3.0 support enabled via libnghttp3])],
+      [with_libnghttp3=no;  AC_MSG_WARN(*** libnghttp3 was not found. HTTP/2.0 support disabled.)])
+    LIBNGHTTP3_LIBS="$LIBS"
+    LIBS="$LIBS $OLD_LIBS"
+  ])
+])
+AM_CONDITIONAL([WITH_LIBNGHTTP3], [test "$with_libnghttp3" = "yes"])
 
 AC_ARG_WITH(gpgme, AS_HELP_STRING([--without-gpgme], [support signature verification with gpgme]), with_gpgme=$withval, with_gpgme=yes)
 AS_IF([test "$with_gpgme" != "no"], [
@@ -1113,6 +1171,8 @@ AC_MSG_NOTICE([Summary of build options:
   PSL support:        $with_libpsl
   HSTS support:       $with_libhsts
   HTTP/2.0 support:   $with_libnghttp2
+  HTTP/3 support:     $with_libnghttp3
+  QUIC support:       $with_libngtcp2
   Documentation:      $DOCS_INFO
   Wget2 docs:         $WGET2_DOCS_INFO
   Libwget docs:       $LIBWGET_DOCS_INFO

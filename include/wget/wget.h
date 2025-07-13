@@ -403,6 +403,7 @@ WGETAPI ssize_t
  * Type for double linked lists and list entries.
  */
 typedef struct wget_list_st wget_list;
+
 typedef int wget_list_browse_fn(void *context, void *elem);
 
 WGETAPI void * NULLABLE
@@ -421,6 +422,32 @@ WGETAPI void
 	wget_list_free(wget_list **list) WGET_GCC_NONNULL_ALL;
 WGETAPI int
 	wget_list_browse(const wget_list *list, wget_list_browse_fn *browse, void *context) WGET_GCC_NONNULL((2));
+
+/**
+ * \ingroup libwget-wget_byte
+ *
+ * Type for stream-byte
+ */
+typedef struct wget_byte_st wget_byte;
+
+#define	REQUEST_BYTE 0
+#define	RESPONSE_HEADER_BYTE 1
+#define	RESPONSE_DATA_BYTE 2
+
+WGETAPI wget_byte *
+	wget_byte_new(const char *data, size_t size, int8_t type);
+WGETAPI size_t
+	wget_byte_get_size(const wget_byte *bytes);
+WGETAPI unsigned char *
+	wget_byte_get_data(const wget_byte *bytes);
+WGETAPI void
+	wget_byte_free(wget_byte *bytes);
+WGETAPI bool
+	wget_byte_get_transmitted(wget_byte *bytes);
+WGETAPI void
+	wget_byte_set_transmitted (wget_byte *bytes);
+WGETAPI int8_t
+	wget_byte_get_type(wget_byte *bytes);
 
 /**
  * \ingroup libwget-xalloc
@@ -1889,6 +1916,7 @@ WGETAPI int
 
 #define WGET_PROTOCOL_HTTP_1_1  0
 #define WGET_PROTOCOL_HTTP_2_0  1
+#define WGET_PROTOCOL_HTTP_3_0  2
 
 typedef struct wget_tcp_st wget_tcp;
 
@@ -1972,6 +2000,92 @@ WGETAPI int
 WGETAPI bool
 	wget_ip_is_family(const char *host, int family) WGET_GCC_PURE;
 
+
+typedef struct wget_quic_st wget_quic;
+
+WGETAPI wget_quic *
+	wget_quic_init(void);
+
+WGETAPI void
+	wget_quic_deinit (wget_quic **_quic);
+
+typedef struct wget_quic_stream_st wget_quic_stream;
+
+WGETAPI wget_quic_stream *
+	wget_quic_stream_init_bidirectional(wget_quic *quic);
+
+WGETAPI wget_quic_stream *
+	wget_quic_stream_init_unidirectional(wget_quic *quic);
+
+WGETAPI int
+	wget_quic_stream_push(wget_quic_stream *stream, const char *data, size_t datalen, uint8_t type);
+
+WGETAPI void
+	wget_quic_stream_set_fin(wget_quic_stream *stream);
+
+WGETAPI bool
+	wget_quic_stream_is_fin_set(wget_quic_stream *stream);
+
+WGETAPI void
+	wget_quic_stream_deinit(wget_quic *quic, wget_quic_stream **s);
+
+WGETAPI wget_quic_stream *
+	wget_quic_stream_find(wget_quic *quic, int64_t stream_id);
+
+WGETAPI int64_t
+	wget_quic_stream_get_stream_id(wget_quic_stream *stream);
+
+WGETAPI size_t
+	wget_byte_get_struct_size(void);
+
+WGETAPI void
+	wget_quic_stream_remove_data(wget_quic_stream *stream, wget_byte *data);
+
+WGETAPI wget_byte*
+	wget_quic_stream_peek_data(wget_quic_stream *stream, int is_transmitted, int type);
+
+WGETAPI wget_quic_stream**
+	wget_quic_get_streams(wget_quic *quic);
+
+WGETAPI void
+	wget_quic_set_ssl_hostname(wget_quic *quic, const char *hostname);
+
+WGETAPI bool
+	wget_quic_get_is_closed(wget_quic *quic);
+
+WGETAPI void
+	wget_quic_set_connect_timeout(wget_quic *quic, int timeout);
+
+WGETAPI void
+	wget_quic_set_http3_conn(wget_quic *quic, void *http3_conn);
+
+WGETAPI void
+	wget_quic_set_is_fin_packet(wget_quic* quic, bool is_fin_packet);
+
+WGETAPI wget_quic_stream*
+	wget_quic_set_stream(wget_quic *quic, int64_t id);
+
+WGETAPI int
+	wget_quic_connect(wget_quic *quic, const char *host, uint16_t port);
+
+WGETAPI int
+	wget_quic_close(wget_quic *quic);
+
+WGETAPI int
+	wget_quic_ack(wget_quic *quic);
+
+WGETAPI ssize_t
+	wget_quic_write(wget_quic *quic, wget_quic_stream *stream);
+
+WGETAPI ssize_t
+	wget_quic_write_multiple(wget_quic *quic,  wget_quic_stream **streams, size_t num_streams);
+
+WGETAPI int
+	wget_quic_read(wget_quic *quic);
+
+WGETAPI int
+	wget_quic_rw_once(wget_quic *quic, wget_quic_stream *stream);
+
 /*
  * SSL routines
  */
@@ -2003,6 +2117,9 @@ WGETAPI bool
 #define WGET_SSL_REPORT_INVALID_CERT 23
 #define WGET_SSL_DANE              24
 
+/*
+	Updating this parameter in other ssl's is pending.
+*/
 WGETAPI void
 	wget_ssl_init(void);
 WGETAPI void
@@ -2015,6 +2132,10 @@ WGETAPI void
 	wget_ssl_set_config_int(int key, int value);
 WGETAPI int
 	wget_ssl_open(wget_tcp *tcp);
+WGETAPI int
+	wget_ssl_open_quic(wget_quic *quic);
+WGETAPI void
+	wget_ssl_close_quic(wget_quic *quic);
 WGETAPI void
 	wget_ssl_close(void **session);
 WGETAPI void
@@ -2362,6 +2483,23 @@ WGETAPI ssize_t
 WGETAPI wget_http_response *
 	wget_http_get(int first_key, ...);
 
+
+/*
+	HTTP/3 routines
+*/
+
+WGETAPI void
+	wget_http3_close(wget_http_connection **http3);
+
+WGETAPI int
+	wget_http3_send_request(wget_http_connection *http3,
+		       wget_http_request *req);
+
+WGETAPI int
+	wget_http3_open(wget_http_connection **h3, const wget_iri *iri);
+
+WGETAPI wget_http_response *
+	wget_http3_get_response(wget_http_connection *http3);
 
 /*
  * random routines

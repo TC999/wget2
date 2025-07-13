@@ -28,9 +28,19 @@
 #ifndef LIBWGET_NET_H
 # define LIBWGET_NET_H
 
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifdef WITH_LIBNGTCP2
+#include <ngtcp2/ngtcp2.h>
+#include <ngtcp2/ngtcp2_crypto.h>
+#endif
+#ifdef WITH_LIBNGHTTP3
+#include <nghttp3/nghttp3.h>
+#endif
 #include <netdb.h>
+
+#define MAX_STREAMS 10
 
 struct wget_tcp_st {
 	void *
@@ -68,5 +78,65 @@ struct wget_tcp_st {
 		tcp_fastopen : 1, // do we use TCP_FASTOPEN or not
 		first_send : 1; // TCP_FASTOPEN's first packet is sent different
 };
+
+#ifdef WITH_LIBNGTCP2
+typedef struct {
+	struct sockaddr addr;
+	size_t size;
+} info_addr;
+
+struct wget_quic_stream_st {
+	int64_t id;
+	wget_list *buffer;
+	size_t sent_offset;
+	size_t ack_offset;
+	bool fin;
+};
+
+struct wget_quic_st {
+	void
+		*ssl_session;
+	ngtcp2_conn
+		*conn;
+#ifdef WITH_LIBNGHTTP3
+	nghttp3_conn
+		*http3_conn;
+#endif
+	int
+		sockfd,
+		timerfd,
+		family,
+		preferred_family,
+		protocol,
+		connect_timeout;
+	info_addr
+		local,
+		remote;
+	struct addrinfo
+		*addrinfo,
+		/*
+			Explore options from where this is set.
+			wget_tcp_set_bind_address func in net.c
+			have that function generalised for connection type.
+		*/
+		*bind_addrinfo;
+	wget_dns
+		*dns;
+	const char
+		*host,
+		*ssl_hostname;
+	bool
+		is_closed,
+		is_fin_packet;
+	uint16_t
+		remote_port;
+
+	wget_quic_stream *streams[MAX_STREAMS]; //Still not figured out.
+	size_t n_streams; /* Number of Open Streams */
+	size_t stream_index; /* Current Stream Index */
+	size_t n_coalescing; /* Number of lines coalesced into single packet */
+	size_t coalesce_count; /* Number of lines currently coalesced */
+};
+#endif /* WITH_LIBNGTCP2 */
 
 #endif /* LIBWGET_NET_H */

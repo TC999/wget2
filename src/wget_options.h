@@ -220,6 +220,7 @@ struct config {
 		netrc,
 		http2,
 		http2_only,
+		http3_only,
 		ocsp_stapling,
 		ocsp,
 		mirror,
