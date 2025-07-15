@@ -41,6 +41,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <poll.h>
 
 #ifdef HAVE_NETINET_TCP_H
 #	include <netinet/tcp.h>
@@ -646,13 +647,6 @@ static void set_socket_options(const wget_tcp *tcp, int fd)
 			debug_printf("Failed to set socket option TCP_FASTOPEN_CONNECT\n");
 	}
 #endif
-
-	// Synchronous socket connection timeout
-	if (tcp->connect_timeout > 0) {
-		struct timeval tv = { .tv_sec = tcp->connect_timeout/1000, .tv_usec = tcp->connect_timeout % 1000 * 1000 };
-		if (setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) == -1)
-			error_printf(_("Failed to set socket option SO_SNDTIMEO\n"));
-	}
 }
 
 /**
@@ -782,6 +776,7 @@ int wget_tcp_connect(wget_tcp *tcp, const char *host, uint16_t port)
 			continue;
 		}
 
+		_set_async (sockfd);
 		set_socket_options(tcp, sockfd);
 
 		if (tcp->bind_addrinfo) {
@@ -806,6 +801,45 @@ int wget_tcp_connect(wget_tcp *tcp, const char *host, uint16_t port)
 			ret = WGET_E_CONNECT;
 			close(sockfd);
 		} else {
+			{ // Blocking behavior for GitHub #325 and GitLab #671
+				struct pollfd pollfd = { .fd = sockfd, .events = POLLOUT };
+
+				debug_printf ("Polling TCP connection for %d ms\n", tcp->connect_timeout);
+#if ((defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__)
+				switch (WSAPoll (&pollfd, 1, tcp->connect_timeout))
+#else
+				switch (poll (&pollfd, 1, tcp->connect_timeout))
+#endif
+				{
+					case -1: // Poll error
+						ret = WGET_E_IO;
+						print_error_host(_("Failed polling connection"), host);
+						close (sockfd);
+						continue;
+					case  0: // Timeout
+						ret = WGET_E_TIMEOUT;
+						close (sockfd);
+						continue;
+					default:
+						// Newer Linux kernels seem to report always POLLHUP first
+						// with POLLOUT to allow applications to check with 'read|write'
+						// calls for EOF.
+						//
+						// Couldn't establish connection
+						if (pollfd.revents & (POLLERR | POLLNVAL)
+								|| !(pollfd.revents & POLLOUT))
+						{
+							ret = WGET_E_CONNECT;
+							debug_printf ("Polling TCP connection failed: {revents: 0x%x\n",
+									(unsigned int)pollfd.revents);
+							close (sockfd);
+							continue;
+						}
+
+						break;
+				}
+			}
+
 			tcp->sockfd = sockfd;
 			if (tcp->ssl) {
 				if ((ret = wget_ssl_open(tcp))) {
@@ -832,8 +866,6 @@ int wget_tcp_connect(wget_tcp *tcp, const char *host, uint16_t port)
 				tcp->ip = NULL;
 
 			tcp->host = wget_strdup(host);
-
-			_set_async(sockfd);
 
 			return WGET_E_SUCCESS;
 		}
