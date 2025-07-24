@@ -1,0 +1,54 @@
+name: C2Rust
+
+on: workflow_dispatch
+
+jobs:
+  C2Rust:
+    runs-on: ubuntu-latest
+    env:
+      LLVM_CONFIG_PATH: /usr/lib/llvm-17/bin/llvm-config
+      LLVM_SYS_170_PREFIX: /usr/lib/llvm-17/
+      CARGO_TERM_COLOR: always
+      LANG: zh_CN.UTF-8
+      LANGUAGE: zh_CN:zh
+      LC_ALL: zh_CN.UTF-8
+
+    steps:
+      - name: 汉化
+        run: |
+          sudo apt-get update
+          sudo apt-get install language-pack-zh-hans
+
+      - name: 安装依赖
+        run: |
+          sudo apt-get install curl expat gettext openssl zlib1g-dev gcc perl make libssl-dev libcurl4-gnutls-dev libexpat1-dev bear llvm-17-dev clang-17 libclang-17-dev
+          sudo apt-get install llvm-17-dev clang-17 libclang-17-dev libssl-dev bear
+
+      - name: 安装 Rust
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+            components: rustfmt, clippy
+
+      - name: 安装 C2Rust
+        run: |
+          cargo install c2rust
+
+      - name: 拉取源码
+        uses: actions/checkout@v4
+
+      - name: 配置
+        run: |
+          ./configure
+
+      - name: 创建数据库
+        run: |
+          bear -- make -j8
+
+      - name: 转换
+        run: |
+          c2rust transpile compile_commands.json
+
+      - name: 查看文件树
+        run: tree
