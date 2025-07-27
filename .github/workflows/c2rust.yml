@@ -37,6 +37,8 @@ jobs:
 
       - name: 拉取源码
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: 配置
         run: |
@@ -58,10 +60,10 @@ jobs:
       - name: 查看文件树
         run: tree
 
-      - name: 更新子模块
-        run: |
-          git submodule sync
-          git submodule update --init --recursive
+      #- name: 更新子模块
+      #  run: |
+      #    git submodule sync
+      #    git submodule update --init --recursive
 
       - name: 删除编译的文档
         run: rm -rf docs/html
