@@ -76,3 +76,10 @@ jobs:
           git add .
           git commit -m "C2Rust"
           git push
+
+      - name: 强制推送
+        if: failure()
+        run: |
+          git add .
+          git commit -m "C2Rust"
+          git push -f
