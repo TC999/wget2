@@ -82,3 +82,8 @@ nbproject
 stamp-h1
 **/po/POTFILES
 wget2-*.tar.*
+
+
+# Added by cargo
+
+/target

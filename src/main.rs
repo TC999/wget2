@@ -7,6 +7,12 @@
     unused_assignments,
     unused_mut
 )]
+
+use crate::libc;
+
+mod bar;
+mod blacklist;
+
 #![feature(c_variadic, core_intrinsics, extern_types)]
 extern "C" {
     pub type _IO_wide_data;
